@@ -1,22 +1,55 @@
 package errflow
 
-import (
-	"io"
-	"log"
-)
-
-// Catcher ...
+// Catcher controls error handling behavior.
+// See Catch() for more info.
 type Catcher interface {
+
+	// WriteTo is a teminal statement, which instructs to write error value
+	// to 'outErr', in case there is an error.
 	WriteTo(outErr *error)
+
+	// Then is a teminal statement, which instructs to call a callback function
+	// with error value, in case there is an error.
 	Then(fn func(err error))
+
+	// ReturnFirst is a non-terminal statement which configures Catcher to
+	// return a first encountered error in case of multiple errors.
+	// This is a default behavior.
 	ReturnFirst() Catcher
+
+	// ReturnLast is a non-terminal statement which configures Catcher to
+	// return a last encountered error in case of multiple errors.
 	ReturnLast() Catcher
+	// ReturnAll is a non-terminal statement which configures Catcher to
+
+	// return all errors in case of multiple errors.
+	// See also errflow.GetAllErrors(...).
 	ReturnAll() Catcher
+
+	// LogAll is a non-terminal statement which configures Catcher to
+	// log all errors using logger function set via errflow.SetLogFn(...).
 	LogAll() Catcher
+
+	// LogNone is a non-terminal statement which configures Catcher to
+	// not not errors.
+	// This is a default behavior.
 	LogNone() Catcher
 }
 
-// Catch ...
+// Catch creates a Catcher instance to control error handling behavior.
+//
+// Example:
+//  func function() (err error) {
+//    defer errflow.Catch().WriteTo(&err)
+//
+//    // Function definition.
+//  }
+//
+// Usage notes:
+//  * errflow.Catch() should be called in a defer, as a first statement.
+//  * errflow.Catch() should be always terminated by .WriteTo(...) or .Then(...).
+//  * it should only process errors returned by the same function where it is declared;
+//    otherwise validation will fail during when running tests.
 func Catch() Catcher {
 	globalErrflowValidator.enter()
 	return &catcher{
@@ -61,25 +94,6 @@ func (c *catcher) LogAll() Catcher {
 func (c *catcher) LogNone() Catcher {
 	c.loggerFn = nil
 	return c
-}
-
-var globalLogFn = func(s string) { log.Print(s) }
-
-type restoreLogFn struct {
-	oldLogFn func(s string)
-}
-
-func (rlf *restoreLogFn) Close() error {
-	globalLogFn = rlf.oldLogFn
-	return nil
-}
-
-func SetLogFn(logFn func(s string)) io.Closer {
-	oldLogFn := globalLogFn
-	globalLogFn = logFn
-	return &restoreLogFn{
-		oldLogFn: oldLogFn,
-	}
 }
 
 func (c *catcher) catch(panicObj interface{}, fn func(err error)) {

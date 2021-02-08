@@ -43,6 +43,8 @@ func (s *returnErrorStrategyAll) returnError(errs []error) error {
 	return &allErrors{errs: errs}
 }
 
+// GetAllErrors unpacks all errors into a slice when error is produced
+// using ReturnAll() strategy.
 func GetAllErrors(err error) []error {
 	all, ok := err.(*allErrors)
 	if ok {

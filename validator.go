@@ -34,10 +34,32 @@ func setValidator(v validator) io.Closer {
 	}
 }
 
+// SetNoopValidator sets no-op validator for errflow.
+//
+// Validator is used to validate that the library is used correctly,
+// meaning each used is limited to a single function.
+//
+// This is a default mode for production, which doesn't compromise performance,
+// but library can be misused in this mode.
+//
+// It returns io.Closer instance,
+// which can be used to restore previous validator,
+// but also can be ignored, if not needed.
 func SetNoopValidator() io.Closer {
 	return setValidator(&noopValidator{})
 }
 
+// SetStackTraceValidator sets a stack-trace based validator for errflow.
+//
+// Validator is used to validate that the library is used correctly,
+// meaning each used is limited to a single function.
+//
+// This is a default mode for tests, which works in most cases, but
+// has performance penalty and might return false positives in some cases.
+//
+// It returns io.Closer instance,
+// which can be used to restore previous validator,
+// but also can be ignored, if not needed.
 func SetStackTraceValidator() io.Closer {
 	return setValidator(&stackTraceValidator{})
 }
