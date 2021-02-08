@@ -1,5 +1,10 @@
 package errflow
 
+import (
+	"fmt"
+	"runtime/debug"
+)
+
 // Catcher controls error handling behavior.
 // See Catch() for more info.
 type Catcher interface {
@@ -108,6 +113,7 @@ func (c *catcher) catch(panicObj interface{}, fn func(err error)) {
 			}
 			fn(c.returnErrorStrategy.returnError(errflowThrow.errs))
 		} else {
+			c.loggerFn(fmt.Sprintf("Panic: %s\n%s", panicObj, debug.Stack()))
 			panic(panicObj)
 		}
 	}
