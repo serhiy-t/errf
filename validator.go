@@ -2,7 +2,6 @@ package errflow
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"runtime"
 	"strconv"
@@ -17,19 +16,18 @@ func init() {
 	}
 }
 
-type restoreValidatorCloser struct {
+type restoreValidatorRestorer struct {
 	oldValidator validator
 }
 
-func (rvc *restoreValidatorCloser) Close() error {
+func (rvc *restoreValidatorRestorer) ThenRestore() {
 	globalErrflowValidator = rvc.oldValidator
-	return nil
 }
 
-func setValidator(v validator) io.Closer {
+func setValidator(v validator) DeferRestorer {
 	oldValidator := globalErrflowValidator
 	globalErrflowValidator = v
-	return &restoreValidatorCloser{
+	return &restoreValidatorRestorer{
 		oldValidator: oldValidator,
 	}
 }
@@ -42,10 +40,9 @@ func setValidator(v validator) io.Closer {
 // This is a default mode for production, which doesn't compromise performance,
 // but library can be misused in this mode.
 //
-// It returns io.Closer instance,
-// which can be used to restore previous validator,
-// but also can be ignored, if not needed.
-func SetNoopValidator() io.Closer {
+// It returns errflow.DeferRestorer instance,
+// which can be used to restore previous validator, if needed.
+func SetNoopValidator() DeferRestorer {
 	return setValidator(&noopValidator{})
 }
 
@@ -57,10 +54,9 @@ func SetNoopValidator() io.Closer {
 // This is a default mode for tests, which works in most cases, but
 // has performance penalty and might return false positives in some cases.
 //
-// It returns io.Closer instance,
-// which can be used to restore previous validator,
-// but also can be ignored, if not needed.
-func SetStackTraceValidator() io.Closer {
+// It returns errflow.DeferRestorer instance,
+// which can be used to restore previous validator, if needed.
+func SetStackTraceValidator() DeferRestorer {
 	return setValidator(&stackTraceValidator{})
 }
 

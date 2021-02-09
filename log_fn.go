@@ -1,30 +1,27 @@
 package errflow
 
 import (
-	"io"
 	"log"
 )
 
 var globalLogFn = func(s string) { log.Print(s) }
 
-type restoreLogFn struct {
+type logFnRestorer struct {
 	oldLogFn func(s string)
 }
 
-func (rlf *restoreLogFn) Close() error {
+func (rlf *logFnRestorer) ThenRestore() {
 	globalLogFn = rlf.oldLogFn
-	return nil
 }
 
 // SetLogFn replaces logging function for errflow.
-// It returns io.Closer instance,
-// which can be used to restore previous logFn,
-// but also can be ignored, if not needed.
+// It returns errflow.DeferRestorer instance,
+// which can be used to restore previous logFn.
 // Default log function is log.Println().
-func SetLogFn(logFn func(s string)) io.Closer {
+func SetLogFn(logFn func(s string)) DeferRestorer {
 	oldLogFn := globalLogFn
 	globalLogFn = logFn
-	return &restoreLogFn{
+	return &logFnRestorer{
 		oldLogFn: oldLogFn,
 	}
 }

@@ -1,21 +1,20 @@
 package errflow
 
-import (
-	"fmt"
-	"runtime/debug"
-)
-
 // Catcher controls error handling behavior.
-// See Catch() for more info.
+// See IfError() for more info.
 type Catcher interface {
 
-	// WriteTo is a teminal statement, which instructs to write error value
+	// ThenAssignTo is a teminal statement, which instructs to write error value
 	// to 'outErr', in case there is an error.
-	WriteTo(outErr *error)
+	ThenAssignTo(outErr *error)
 
 	// Then is a teminal statement, which instructs to call a callback function
 	// with error value, in case there is an error.
 	Then(fn func(err error))
+
+	// ThenIgnore is a teminal statement, which instructs to ignore errors encountered
+	// in this function.
+	ThenIgnore()
 
 	// ReturnFirst is a non-terminal statement which configures Catcher to
 	// return a first encountered error in case of multiple errors.
@@ -25,8 +24,8 @@ type Catcher interface {
 	// ReturnLast is a non-terminal statement which configures Catcher to
 	// return a last encountered error in case of multiple errors.
 	ReturnLast() Catcher
-	// ReturnAll is a non-terminal statement which configures Catcher to
 
+	// ReturnAll is a non-terminal statement which configures Catcher to
 	// return all errors in case of multiple errors.
 	// See also errflow.GetAllErrors(...).
 	ReturnAll() Catcher
@@ -41,21 +40,21 @@ type Catcher interface {
 	LogNone() Catcher
 }
 
-// Catch creates a Catcher instance to control error handling behavior.
+// IfError creates a Catcher instance to control error handling behavior.
 //
 // Example:
 //  func function() (err error) {
-//    defer errflow.Catch().WriteTo(&err)
+//    defer errflow.IfError().WriteTo(&err)
 //
 //    // Function definition.
 //  }
 //
 // Usage notes:
-//  * errflow.Catch() should be called in a defer, as a first statement.
-//  * errflow.Catch() should be always terminated by .WriteTo(...) or .Then(...).
+//  * errflow.IfError() should be called in a defer, as a first statement.
+//  * errflow.IfError() should be always terminated by one of .Then*(...) functions.
 //  * it should only process errors returned by the same function where it is declared;
 //    otherwise validation will fail during when running tests.
-func Catch() Catcher {
+func IfError() Catcher {
 	globalErrflowValidator.enter()
 	return &catcher{
 		returnErrorStrategy: &returnErrorStrategyFirst{},
@@ -68,12 +67,16 @@ type catcher struct {
 	loggerFn            func(s string)
 }
 
-func (c *catcher) WriteTo(outErr *error) {
+func (c *catcher) ThenAssignTo(outErr *error) {
 	c.catch(recover(), func(err error) { *outErr = err })
 }
 
 func (c *catcher) Then(fn func(err error)) {
 	c.catch(recover(), fn)
+}
+
+func (c *catcher) ThenIgnore() {
+	c.catch(recover(), func(err error) {})
 }
 
 func (c *catcher) ReturnFirst() Catcher {
@@ -101,10 +104,10 @@ func (c *catcher) LogNone() Catcher {
 	return c
 }
 
-func (c *catcher) catch(panicObj interface{}, fn func(err error)) {
+func (c *catcher) catch(recoverObj interface{}, fn func(err error)) {
 	globalErrflowValidator.leave()
-	if panicObj != nil {
-		errflowThrow, ok := panicObj.(errflowThrow)
+	if recoverObj != nil {
+		errflowThrow, ok := recoverObj.(errflowThrow)
 		if ok {
 			if c.loggerFn != nil {
 				for _, err := range errflowThrow.errs {
@@ -113,8 +116,7 @@ func (c *catcher) catch(panicObj interface{}, fn func(err error)) {
 			}
 			fn(c.returnErrorStrategy.returnError(errflowThrow.errs))
 		} else {
-			c.loggerFn(fmt.Sprintf("Panic: %s\n%s", panicObj, debug.Stack()))
-			panic(panicObj)
+			panic(recoverObj)
 		}
 	}
 }

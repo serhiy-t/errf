@@ -9,7 +9,7 @@ import (
 
 func TestErrflow_Check(t *testing.T) {
 	fn := func() (err error) {
-		defer Catch().WriteTo(&err)
+		defer IfError().ThenAssignTo(&err)
 		Check(fmt.Errorf("error"))
 		return nil
 	}
@@ -17,52 +17,38 @@ func TestErrflow_Check(t *testing.T) {
 	assert.EqualError(t, fn(), "error")
 }
 
-func TestErrflow_C(t *testing.T) {
+func TestErrflow_CheckUntyped(t *testing.T) {
 	fn := func() (err error) {
-		defer Catch().WriteTo(&err)
-		C(fmt.Errorf("error"))
+		defer IfError().ThenAssignTo(&err)
+		assert.Equal(t, "value", CheckUntyped("value", fmt.Errorf("error")))
 		return nil
 	}
 
 	assert.EqualError(t, fn(), "error")
 }
 
-func TestErrflow_Untyped(t *testing.T) {
+func TestErrflow_CheckIgnoreValue(t *testing.T) {
 	fn := func() (err error) {
-		defer Catch().WriteTo(&err)
-		assert.Equal(t, "value", Untyped("value", fmt.Errorf("error")))
+		defer IfError().ThenAssignTo(&err)
+		CheckIgnoreValue("value", fmt.Errorf("error"))
 		return nil
 	}
 
 	assert.EqualError(t, fn(), "error")
 }
 
-func TestErrflow_U(t *testing.T) {
+func TestErrflow_OnlyLog(t *testing.T) {
+	var logs []string
+	defer SetLogFn(func(s string) {
+		logs = append(logs, s)
+	}).ThenRestore()
+
 	fn := func() (err error) {
-		defer Catch().WriteTo(&err)
-		assert.Equal(t, "value", U("value", fmt.Errorf("error")))
+		defer IfError().LogNone().ThenAssignTo(&err)
+		defer OnlyLog(fmt.Errorf("error message"))
 		return nil
 	}
 
-	assert.EqualError(t, fn(), "error")
-}
-
-func TestErrflow_IgnoreReturnValue(t *testing.T) {
-	fn := func() (err error) {
-		defer Catch().WriteTo(&err)
-		IgnoreReturnValue("value", fmt.Errorf("error"))
-		return nil
-	}
-
-	assert.EqualError(t, fn(), "error")
-}
-
-func TestErrflow_I(t *testing.T) {
-	fn := func() (err error) {
-		defer Catch().WriteTo(&err)
-		I("value", fmt.Errorf("error"))
-		return nil
-	}
-
-	assert.EqualError(t, fn(), "error")
+	assert.NoError(t, fn())
+	assert.Equal(t, []string{"error message"}, logs)
 }

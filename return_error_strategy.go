@@ -46,12 +46,32 @@ func (s *returnErrorStrategyAll) returnError(errs []error) error {
 // GetAllErrors unpacks all errors into a slice when error is produced
 // using ReturnAll() strategy.
 func GetAllErrors(err error) []error {
+	return getAllErrorsInternal(err, false)
+}
+
+// GetAllErrorsFlattened unpacks all errors into a slice when error is produced
+// using ReturnAll() strategy.
+// Result is flattened, meaning if any error containes nested multiple errors, all will
+// be unpacked.
+func GetAllErrorsFlattened(err error) []error {
+	return getAllErrorsInternal(err, true)
+}
+
+func getAllErrorsInternal(err error, flattened bool) []error {
+	var result []error
+
 	all, ok := err.(*allErrors)
 	if ok {
-		return all.errs
+		for _, nestedErr := range all.errs {
+			if flattened {
+				result = append(result, getAllErrorsInternal(nestedErr, true)...)
+			} else {
+				result = append(result, nestedErr)
+			}
+		}
 	} else if err != nil {
-		return []error{err}
-	} else {
-		return nil
+		result = append(result, err)
 	}
+
+	return result
 }

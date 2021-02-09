@@ -2,15 +2,16 @@ package errflow
 
 import (
 	"fmt"
+	"runtime/debug"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCatcher_WriteTo(t *testing.T) {
+func TestCatcher_ThenAssignTo(t *testing.T) {
 	fn := func(returnErr error) (err error) {
-		defer Catch().WriteTo(&err)
-		return C(returnErr)
+		defer IfError().ThenAssignTo(&err)
+		return Check(returnErr)
 	}
 
 	assert.Nil(t, fn(nil))
@@ -20,8 +21,8 @@ func TestCatcher_WriteTo(t *testing.T) {
 func TestCatcher_Then(t *testing.T) {
 	var outErr error
 	fn := func(returnErr error) {
-		defer Catch().Then(func(err error) { outErr = err })
-		C(returnErr)
+		defer IfError().Then(func(err error) { outErr = err })
+		Check(returnErr)
 	}
 
 	fn(nil)
@@ -32,9 +33,9 @@ func TestCatcher_Then(t *testing.T) {
 
 func TestCatcher_ReturnFirst(t *testing.T) {
 	fn := func() (err error) {
-		defer Catch().ReturnFirst().WriteTo(&err)
-		defer C(fmt.Errorf("second"))
-		defer C(fmt.Errorf("first"))
+		defer IfError().ReturnFirst().ThenAssignTo(&err)
+		defer Check(fmt.Errorf("second"))
+		defer Check(fmt.Errorf("first"))
 		return nil
 	}
 
@@ -43,9 +44,9 @@ func TestCatcher_ReturnFirst(t *testing.T) {
 
 func TestCatcher_ReturnLast(t *testing.T) {
 	fn := func() (err error) {
-		defer Catch().ReturnLast().WriteTo(&err)
-		defer C(fmt.Errorf("second"))
-		defer C(fmt.Errorf("first"))
+		defer IfError().ReturnLast().ThenAssignTo(&err)
+		defer Check(fmt.Errorf("second"))
+		defer Check(fmt.Errorf("first"))
 		return nil
 	}
 
@@ -54,9 +55,9 @@ func TestCatcher_ReturnLast(t *testing.T) {
 
 func TestCatcher_ReturnAll(t *testing.T) {
 	fn := func() (err error) {
-		defer Catch().ReturnAll().WriteTo(&err)
-		defer C(fmt.Errorf("second"))
-		defer C(fmt.Errorf("first"))
+		defer IfError().ReturnAll().ThenAssignTo(&err)
+		defer Check(fmt.Errorf("second"))
+		defer Check(fmt.Errorf("first"))
 		return nil
 	}
 
@@ -69,12 +70,12 @@ func TestCatcher_LogNone(t *testing.T) {
 	var logs []string
 	defer SetLogFn(func(s string) {
 		logs = append(logs, s)
-	}).Close()
+	}).ThenRestore()
 
 	fn := func() (err error) {
-		defer Catch().LogNone().WriteTo(&err)
-		defer C(fmt.Errorf("second"))
-		defer C(fmt.Errorf("first"))
+		defer IfError().LogNone().ThenAssignTo(&err)
+		defer Check(fmt.Errorf("second"))
+		defer Check(fmt.Errorf("first"))
 		return nil
 	}
 
@@ -86,12 +87,12 @@ func TestCatcher_LogAll(t *testing.T) {
 	var logs []string
 	defer SetLogFn(func(s string) {
 		logs = append(logs, s)
-	}).Close()
+	}).ThenRestore()
 
 	fn := func() (err error) {
-		defer Catch().LogAll().WriteTo(&err)
-		defer C(fmt.Errorf("second"))
-		defer C(fmt.Errorf("first"))
+		defer IfError().LogAll().ThenAssignTo(&err)
+		defer Check(fmt.Errorf("second"))
+		defer Check(fmt.Errorf("first"))
 		return nil
 	}
 
@@ -99,10 +100,15 @@ func TestCatcher_LogAll(t *testing.T) {
 	assert.Equal(t, []string{"first", "second"}, logs)
 }
 
+func unrelatedPanicFn() {
+	panic(fmt.Errorf("unrelated panic"))
+}
+
 func TestCatcher_UnrelatedPanic(t *testing.T) {
 	fn := func() (err error) {
-		defer Catch().WriteTo(&err)
-		panic(fmt.Errorf("unrelated panic"))
+		defer IfError().ThenAssignTo(&err)
+		unrelatedPanicFn()
+		return nil
 	}
 
 	assert.PanicsWithError(t, "unrelated panic", func() {
@@ -110,11 +116,26 @@ func TestCatcher_UnrelatedPanic(t *testing.T) {
 	})
 }
 
+func TestCatcher_UnrelatedPanicStacktrace(t *testing.T) {
+	fn := func() (err error) {
+		defer IfError().ThenAssignTo(&err)
+		unrelatedPanicFn()
+		return nil
+	}
+
+	defer func() {
+		recover()
+		assert.Contains(t, string(debug.Stack()), "unrelatedPanicFn")
+	}()
+
+	fn()
+}
+
 func TestCatcher_UnrelatedPanicMultipleErrors(t *testing.T) {
 	fn := func() (err error) {
-		defer Catch().ReturnFirst().WriteTo(&err)
-		defer C(fmt.Errorf("second"))
-		defer C(fmt.Errorf("first"))
+		defer IfError().ReturnFirst().ThenAssignTo(&err)
+		defer Check(fmt.Errorf("second"))
+		defer Check(fmt.Errorf("first"))
 		panic(fmt.Errorf("unrelated panic"))
 	}
 
