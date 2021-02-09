@@ -1,5 +1,7 @@
 package errflow
 
+import "fmt"
+
 type errflowThrow struct {
 	errs []error
 }
@@ -114,4 +116,11 @@ func OnlyLog(err error) error {
 		globalLogFn(err.Error())
 	}
 	return err
+}
+
+// ErrorIf sends error to Catcher for processing, if condition is true.
+func ErrorIf(condition bool, format string, a ...interface{}) {
+	if condition {
+		ImplementCheck(recover(), fmt.Errorf(format, a...))
+	}
 }

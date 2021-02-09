@@ -28,6 +28,7 @@ func CopyPlainGo(dstFilename string, srcFilename string) error {
 }
 
 // CopyErrflow is an example of copying a file, using idiomatic errflow.
+// Unlike CopyPlainGo, this implementation is not broken.
 func CopyErrflow(dstFilename string, srcFilename string) (err error) {
 	defer errflow.IfError().ReturnFirst().LogAll().ThenAssignTo(&err)
 
@@ -37,5 +38,5 @@ func CopyErrflow(dstFilename string, srcFilename string) (err error) {
 	writer := errflow.CheckIoWriteCloser(os.Create(dstFilename))
 	defer errflow.Check(writer.Close())
 
-	return errflow.CheckIgnoreValue(io.Copy(writer, reader))
+	return errflow.CheckDiscard(io.Copy(writer, reader))
 }
