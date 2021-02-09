@@ -65,14 +65,14 @@ func Check(err error) error {
 	return ImplementCheck(recover(), err)
 }
 
-// CheckUntyped sends error to Catcher for processing, if there is an error.
-// If there is no error, it returns value as a generic interface.
+// CheckAny sends error to Catcher for processing, if there is an error.
+// If there is no error, it returns value as a generic interface{}.
 //
 // Example:
 //  function ProcessFile() (err error) {
 //    defer errflow.IfError().ThenAssignTo(&err)
 //
-//    file := errflow.CheckUntyped(os.Create("file.go")).(*os.File)
+//    file := errflow.CheckAny(os.Create("file.go")).(*os.File)
 //    defer errflow.Check(file.Close())
 //
 //    // Write to file ...
@@ -90,7 +90,7 @@ func Check(err error) error {
 //
 //    // Write to file ...
 //  }
-func CheckUntyped(value interface{}, err error) interface{} {
+func CheckAny(value interface{}, err error) interface{} {
 	ImplementCheck(recover(), err)
 	return value
 }

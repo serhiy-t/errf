@@ -17,10 +17,10 @@ func TestErrflow_Check(t *testing.T) {
 	assert.EqualError(t, fn(), "error")
 }
 
-func TestErrflow_CheckUntyped(t *testing.T) {
+func TestErrflow_CheckAny(t *testing.T) {
 	fn := func() (err error) {
 		defer IfError().ThenAssignTo(&err)
-		assert.Equal(t, "value", CheckUntyped("value", fmt.Errorf("error")))
+		assert.Equal(t, "value", CheckAny("value", fmt.Errorf("error")))
 		return nil
 	}
 
