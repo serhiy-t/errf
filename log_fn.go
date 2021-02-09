@@ -1,24 +1,65 @@
-package errflow
+package errf
 
 import (
+	"fmt"
 	"log"
+	"strings"
 )
 
-var globalLogFn = func(s string) { log.Print(s) }
+// LogFn defines logger function API for errflow.
+type LogFn func(logMessage *LogMessage)
+
+var globalLogFn = defaulGlobalLogFn(func(s string) {
+	log.Println(s)
+})
+
+func defaulGlobalLogFn(printFn func(string)) LogFn {
+	return func(logMessage *LogMessage) {
+		var buffer strings.Builder
+
+		for _, tag := range logMessage.Tags {
+			fmt.Fprintf(&buffer, "[%s]", tag)
+		}
+		if buffer.Len() > 0 {
+			fmt.Fprintf(&buffer, " ")
+		}
+
+		fmt.Fprintf(&buffer, logMessage.Format, logMessage.A...)
+		if logMessage.Stack != nil {
+			fmt.Fprintf(&buffer, "\n\nStack:\n%s", logMessage.Stack())
+		}
+
+		printFn(buffer.String())
+	}
+}
 
 type logFnRestorer struct {
-	oldLogFn func(s string)
+	oldLogFn LogFn
 }
 
 func (rlf *logFnRestorer) ThenRestore() {
 	globalLogFn = rlf.oldLogFn
 }
 
+// LogMessage defines a single log message interface.
+type LogMessage struct {
+	// Format is a format string.
+	Format string
+	// A contains arguments for Format string.
+	A []interface{}
+
+	// Stack function returns stacktrace string.
+	Stack func() string
+
+	// Tags contains additional tags.
+	Tags []string
+}
+
 // SetLogFn replaces logging function for errflow.
-// It returns errflow.DeferRestorer instance,
+// It returns errf.DeferRestorer instance,
 // which can be used to restore previous logFn, if needed.
 // Default log function is log.Println().
-func SetLogFn(logFn func(s string)) DeferRestorer {
+func SetLogFn(logFn LogFn) DeferRestorer {
 	oldLogFn := globalLogFn
 	globalLogFn = logFn
 	return &logFnRestorer{

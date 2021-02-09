@@ -1,4 +1,4 @@
-package errflow
+package errf
 
 import (
 	"fmt"
@@ -35,12 +35,12 @@ func setValidator(v validator) DeferRestorer {
 // SetNoopValidator sets no-op validator for errflow.
 //
 // Validator is used to validate that the library is used correctly,
-// meaning each used is limited to a single function.
+// meaning each usage is limited to a single function.
 //
 // This is a default mode for production, which doesn't compromise performance,
 // but library can be misused in this mode.
 //
-// It returns errflow.DeferRestorer instance,
+// It returns errf.DeferRestorer instance,
 // which can be used to restore previous validator, if needed.
 func SetNoopValidator() DeferRestorer {
 	return setValidator(&noopValidator{})
@@ -49,12 +49,12 @@ func SetNoopValidator() DeferRestorer {
 // SetStackTraceValidator sets a stack-trace based validator for errflow.
 //
 // Validator is used to validate that the library is used correctly,
-// meaning each used is limited to a single function.
+// meaning each usage is limited to a single function.
 //
 // This is a default mode for tests, which works in most cases, but
 // has performance penalty and might return false positives in some cases.
 //
-// It returns errflow.DeferRestorer instance,
+// It returns errf.DeferRestorer instance,
 // which can be used to restore previous validator, if needed.
 func SetStackTraceValidator() DeferRestorer {
 	return setValidator(&stackTraceValidator{})
@@ -63,15 +63,17 @@ func SetStackTraceValidator() DeferRestorer {
 type validator interface {
 	enter()
 	leave()
+	markPanic()
 	validate()
 }
 
 type noopValidator struct {
 }
 
-func (v *noopValidator) enter()    {}
-func (v *noopValidator) leave()    {}
-func (v *noopValidator) validate() {}
+func (v *noopValidator) enter()     {}
+func (v *noopValidator) leave()     {}
+func (v *noopValidator) markPanic() {}
+func (v *noopValidator) validate()  {}
 
 type stackTraceValidator struct {
 }
@@ -84,12 +86,17 @@ func (v *stackTraceValidator) leave() {
 	getGoroutineErrflowStack().pop()
 }
 
+func (v *stackTraceValidator) markPanic() {
+	getGoroutineErrflowStack().markPanic = true
+}
+
 func (v *stackTraceValidator) validate() {
 	getGoroutineErrflowStack().validate()
 }
 
 type errflowStack struct {
-	stack []string
+	stack     []string
+	markPanic bool
 }
 
 func (s *errflowStack) push() {
@@ -99,34 +106,31 @@ func (s *errflowStack) push() {
 func (s *errflowStack) pop() {
 	s.validate()
 	s.stack = s.stack[:len(s.stack)-1]
+	s.markPanic = false
 	cleanupGoroutineErrflowStack()
 }
 
 func (s *errflowStack) validate() {
-	if len(s.stack) == 0 || s.stack[len(s.stack)-1] != getCurrentCallerFn() {
+	if s.markPanic {
+		return
+	}
+	currentCallerFn := getCurrentCallerFn()
+	if len(s.stack) == 0 || s.stack[len(s.stack)-1] != currentCallerFn {
 		panic(fmt.Errorf("errflow incorrect call sequence"))
 	}
 }
 
 func getCurrentCallerFn() string {
-	depth := 1
-	for {
-		c, _, _, _ := runtime.Caller(depth)
-		fn := runtime.FuncForPC(c).Name()
-		if strings.HasPrefix(fn, "runtime") || strings.HasPrefix(fn, "testing") {
-			depth++
-			continue
-		}
-		if strings.Contains(fn, "errflow.ImplementCheck") {
-			depth += 2
-			continue
-		}
-		if strings.Contains(fn, "errflow.") {
-			depth++
-			continue
-		}
-		return fn
+	parsedStack := getErrorStackTrace()
+	if len(parsedStack.items) == 0 {
+		return "<unknown>"
 	}
+	fn := parsedStack.items[0].fn
+	pIdx := strings.Index(fn, "(")
+	if pIdx != -1 {
+		fn = fn[:pIdx+1]
+	}
+	return fn
 }
 
 func (s *errflowStack) empty() bool {
