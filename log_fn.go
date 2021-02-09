@@ -16,7 +16,7 @@ func (rlf *logFnRestorer) ThenRestore() {
 
 // SetLogFn replaces logging function for errflow.
 // It returns errflow.DeferRestorer instance,
-// which can be used to restore previous logFn.
+// which can be used to restore previous logFn, if needed.
 // Default log function is log.Println().
 func SetLogFn(logFn func(s string)) DeferRestorer {
 	oldLogFn := globalLogFn
