@@ -119,8 +119,9 @@ func OnlyLog(err error) error {
 }
 
 // ErrorIf sends error to Catcher for processing, if condition is true.
-func ErrorIf(condition bool, format string, a ...interface{}) {
+func ErrorIf(condition bool, format string, a ...interface{}) error {
 	if condition {
-		ImplementCheck(recover(), fmt.Errorf(format, a...))
+		return ImplementCheck(recover(), fmt.Errorf(format, a...))
 	}
+	return nil
 }
