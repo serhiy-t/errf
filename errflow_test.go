@@ -27,10 +27,10 @@ func TestErrflow_CheckAny(t *testing.T) {
 	assert.EqualError(t, fn(), "error")
 }
 
-func TestErrflow_CheckDiscardValue(t *testing.T) {
+func TestErrflow_CheckDiscard(t *testing.T) {
 	fn := func() (err error) {
 		defer IfError().ThenAssignTo(&err)
-		CheckDiscardValue("value", fmt.Errorf("error"))
+		CheckDiscard("value", fmt.Errorf("error"))
 		return nil
 	}
 

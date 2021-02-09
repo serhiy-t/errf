@@ -95,16 +95,16 @@ func CheckAny(value interface{}, err error) interface{} {
 	return value
 }
 
-// CheckDiscardValue sends error to Catcher for processing, if there is an error.
+// CheckDiscard sends error to Catcher for processing, if there is an error.
 // Non-error value returned from a function is ignored.
 //
 // Example:
 //  function writeBuf(w io.Writer, buf []byte) (err error) {
 //    defer errflow.IfError().ThenAssignTo(&err)
 //
-//    errflow.CheckDiscardValue(w.Write(buf))
+//    return errflow.CheckDiscard(w.Write(buf))
 //  }
-func CheckDiscardValue(value interface{}, err error) error {
+func CheckDiscard(value interface{}, err error) error {
 	return ImplementCheck(recover(), err)
 }
 
