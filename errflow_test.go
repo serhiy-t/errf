@@ -27,10 +27,10 @@ func TestErrflow_CheckUntyped(t *testing.T) {
 	assert.EqualError(t, fn(), "error")
 }
 
-func TestErrflow_CheckIgnoreValue(t *testing.T) {
+func TestErrflow_CheckDiscardValue(t *testing.T) {
 	fn := func() (err error) {
 		defer IfError().ThenAssignTo(&err)
-		CheckIgnoreValue("value", fmt.Errorf("error"))
+		CheckDiscardValue("value", fmt.Errorf("error"))
 		return nil
 	}
 

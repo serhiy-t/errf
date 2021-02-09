@@ -95,16 +95,16 @@ func CheckUntyped(value interface{}, err error) interface{} {
 	return value
 }
 
-// CheckIgnoreValue sends error to Catcher for processing, if there is an error.
+// CheckDiscardValue sends error to Catcher for processing, if there is an error.
 // Non-error value returned from a function is ignored.
 //
 // Example:
 //  function writeBuf(w io.Writer, buf []byte) (err error) {
 //    defer errflow.IfError().ThenAssignTo(&err)
 //
-//    errflow.CheckIgnoreValue(w.Write(buf))
+//    errflow.CheckDiscardValue(w.Write(buf))
 //  }
-func CheckIgnoreValue(value interface{}, err error) error {
+func CheckDiscardValue(value interface{}, err error) error {
 	return ImplementCheck(recover(), err)
 }
 
