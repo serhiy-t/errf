@@ -109,24 +109,34 @@ func (s *errflowStack) validate() {
 }
 
 func getCurrentCallerFn() string {
-	depth := 1
-	for {
-		c, _, _, _ := runtime.Caller(depth)
-		fn := runtime.FuncForPC(c).Name()
+	pc := make([]uintptr, 64)
+	pc = pc[:runtime.Callers(1, pc)]
+	frames := runtime.CallersFrames(pc)
+
+	for frame, next := frames.Next(); next; frame, next = frames.Next() {
+		// fn := fmt.Sprintf("%s:%d %s", frame.File, frame.Line, frame.Function)
+		fn := frame.Function
+		f := frame.File
 		if strings.HasPrefix(fn, "runtime") || strings.HasPrefix(fn, "testing") {
-			depth++
 			continue
 		}
-		if strings.Contains(fn, "errflow.ImplementCheck") {
-			depth += 2
+
+		if strings.HasSuffix(fn, "errflow.ImplementTry") {
+			if _, hasNext := frames.Next(); hasNext {
+				continue
+			} else {
+				break
+			}
+		}
+
+		if strings.Contains(fn, "errflow.") && !strings.HasSuffix(f, "_test.go") {
 			continue
 		}
-		if strings.Contains(fn, "errflow.") {
-			depth++
-			continue
-		}
+
 		return fn
 	}
+
+	return "<unknown>"
 }
 
 func (s *errflowStack) empty() bool {

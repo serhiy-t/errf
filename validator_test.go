@@ -7,20 +7,30 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestValidator_CheckWithoutCatch(t *testing.T) {
+func TestValidator_CorrectTryErr(t *testing.T) {
 	fn := func() (err error) {
-		return Check(nil)
+		defer IfError().ThenAssignTo(&err)
+		return TryErr(nil)
+	}
+	assert.NotPanics(t, func() {
+		assert.NoError(t, fn())
+	})
+}
+
+func TestValidator_TryErrWithoutIfError(t *testing.T) {
+	fn := func() (err error) {
+		return TryErr(nil)
 	}
 	assert.PanicsWithError(t, "errflow incorrect call sequence", func() {
 		fn()
 	})
 }
 
-func TestValidator_CheckWithoutCatchDisabledValidator(t *testing.T) {
+func TestValidator_TryErrWithoutErrorDisabledValidator(t *testing.T) {
 	defer SetNoopValidator().ThenRestore()
 
 	fn := func() (err error) {
-		return Check(nil)
+		return TryErr(nil)
 	}
 	assert.NotPanics(t, func() {
 		fn()
@@ -32,7 +42,7 @@ func TestValidator_DisabledValidator(t *testing.T) {
 
 	fn := func() (err error) {
 		defer IfError().ThenAssignTo(&err)
-		return Check(nil)
+		return TryErr(nil)
 	}
 	assert.NoError(t, fn())
 	assert.NotPanics(t, func() {
@@ -48,9 +58,35 @@ func TestValidator_NestedCatches(t *testing.T) {
 		if level > 0 {
 			return fn(level - 1)
 		}
-		return Check(fmt.Errorf("error message"))
+		return TryErr(fmt.Errorf("error message"))
 	}
 	assert.EqualError(t, fn(5), "error message")
+}
+
+func TestValidator_IncorrectNestedFns(t *testing.T) {
+	fn := func() (err error) {
+		defer IfError().ThenAssignTo(&err)
+
+		func() {
+			TryErr(fmt.Errorf("error message"))
+		}()
+
+		return nil
+	}
+	assert.PanicsWithError(t, "errflow incorrect call sequence", func() {
+		fn()
+	})
+}
+
+func TestValidator_CorrectNestedFns(t *testing.T) {
+	fn := func() (err error) {
+		return func() (err error) {
+			defer IfError().ThenAssignTo(&err)
+
+			return TryErr(fmt.Errorf("error message"))
+		}()
+	}
+	assert.EqualError(t, fn(), "error message")
 }
 
 func TestValidator_MissingCatchStatement(t *testing.T) {
@@ -61,7 +97,7 @@ func TestValidator_MissingCatchStatement(t *testing.T) {
 		if level > 0 {
 			return fn(level - 1)
 		}
-		return Check(fmt.Errorf("error message"))
+		return TryErr(fmt.Errorf("error message"))
 	}
 	assert.PanicsWithError(t, "errflow incorrect call sequence", func() {
 		fn(5)
