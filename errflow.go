@@ -16,6 +16,7 @@ type Errflow struct {
 	returnStrategy
 
 	deferredOptions []ErrflowOption
+	appliedOptions  []ErrflowOption
 }
 
 func (ef *Errflow) applyDeferredOptions() {
@@ -24,6 +25,7 @@ func (ef *Errflow) applyDeferredOptions() {
 		newEf = option(newEf)
 	}
 	*ef = *newEf
+	ef.appliedOptions = append(ef.appliedOptions, ef.deferredOptions...)
 	ef.deferredOptions = nil
 }
 
@@ -34,6 +36,7 @@ func (ef *Errflow) copy() *Errflow {
 		returnStrategy: ef.returnStrategy,
 
 		deferredOptions: ef.deferredOptions,
+		appliedOptions:  ef.appliedOptions,
 	}
 }
 
@@ -62,6 +65,18 @@ func (ef *Errflow) With(options ...ErrflowOption) *Errflow {
 	result := ef.copy()
 	result.deferredOptions = append([]ErrflowOption{}, ef.deferredOptions...)
 	result.deferredOptions = append(result.deferredOptions, options...)
+	return result
+}
+
+// Opts returns all options, which were applied on top of DefaultErrflow instance.
+func (ef *Errflow) Opts() []ErrflowOption {
+	if ef.appliedOptions == nil {
+		return ef.deferredOptions
+	}
+
+	var result []ErrflowOption
+	result = append(result, ef.appliedOptions...)
+	result = append(result, ef.deferredOptions...)
 	return result
 }
 
@@ -228,6 +243,11 @@ func TryCondition(condition bool, format string, a ...interface{}) error {
 		return DefaultErrflow.ImplementTry(recover(), fmt.Errorf(format, a...))
 	}
 	return nil
+}
+
+// Log is an alias for errf.Log(...) function.
+func (ef *Errflow) Log(err error) error {
+	return Log(err)
 }
 
 // Log logs error, if not nil.

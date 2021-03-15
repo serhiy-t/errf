@@ -155,6 +155,20 @@ func TestErrflow_IfError_Apply(t *testing.T) {
 		"combined error {error1; error2; error3}")
 }
 
-func TestErrflow_TryErr_panics(t *testing.T) {
+func TestErrflow_Opts(t *testing.T) {
+	errflow := With(LogStrategyAlways)
 
+	errflow1 := With(errflow.Opts()...)
+	errflow1.applyDeferredOptions()
+
+	errflow.applyDeferredOptions()
+	errflow = errflow.With(ReturnStrategyWrapped)
+	errflow2 := With(errflow.Opts()...)
+	errflow2.applyDeferredOptions()
+
+	assert.Equal(t, errflow1.logStrategy, logStrategyAlways)
+	assert.Equal(t, errflow1.returnStrategy, returnStrategyDefault)
+
+	assert.Equal(t, errflow2.logStrategy, logStrategyAlways)
+	assert.Equal(t, errflow2.returnStrategy, returnStrategyWrapped)
 }

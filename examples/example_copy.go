@@ -94,6 +94,11 @@ func CopyFilePlainGo(dstFilename string, srcFilename string) (err error) {
 
 // CopyFileErrflowNoPanics copies file srcFilename into dstFilename.
 func CopyFileErrflowNoPanics(dstFilename string, srcFilename string) (err error) {
+	errflow := errf.With(
+		errf.LogStrategyIfSuppressed,
+		errf.WrapperFmtErrorw("error copying file"),
+	)
+
 	if len(dstFilename) == 0 {
 		return fmt.Errorf("error copying file: dst file should be specified")
 	}
@@ -105,24 +110,18 @@ func CopyFileErrflowNoPanics(dstFilename string, srcFilename string) (err error)
 	if err != nil {
 		return fmt.Errorf("error copying file: %w", err)
 	}
-	defer errf.Log(
+	defer errflow.Log(
 		reader.Close())
 
 	writer, err := os.Create(dstFilename)
 	if err != nil {
 		return fmt.Errorf("error copying file: %w", err)
 	}
-	defer errf.With(
-		errf.LogStrategyIfSuppressed,
-		errf.WrapperFmtErrorw("error copying file"),
-	).IfErrorAssignTo(&err,
+	defer errflow.IfErrorAssignTo(&err,
 		writer.Close())
 
 	bufWriter := bufio.NewWriter(writer)
-	defer errf.With(
-		errf.LogStrategyIfSuppressed,
-		errf.WrapperFmtErrorw("error copying file"),
-	).IfErrorAssignTo(&err,
+	defer errflow.IfErrorAssignTo(&err,
 		bufWriter.Flush())
 
 	_, err = io.Copy(bufWriter, bufio.NewReader(reader))
