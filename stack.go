@@ -44,11 +44,11 @@ func getErrorStackTrace() parsedStack {
 			strings.HasPrefix(lines[idx], "panic(") {
 			continue
 		}
-		if strings.Contains(lines[idx], "/errflow.(*Errflow).ImplementTry(") {
+		if strings.Contains(lines[idx], "/errf.(*Errflow).ImplementTry(") {
 			idx += 2
 			continue
 		}
-		if strings.Contains(lines[idx], "/errflow.") && !strings.Contains(lines[idx+1], "_test.go") {
+		if strings.Contains(lines[idx], "/errf.") && !strings.Contains(lines[idx+1], "_test.go") {
 			continue
 		}
 		break

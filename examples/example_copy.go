@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	errf "github.com/serhiy-t/errflow"
+	"github.com/serhiy-t/errf"
 )
 
 // CopyFileErrflow copies file srcFilename into dstFilename.
