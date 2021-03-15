@@ -1,4 +1,4 @@
-module github.com/serhiy-t/errflow
+module github.com/serhiy-t/errf
 
 go 1.15
 
