@@ -1,4 +1,4 @@
-package errflow
+package errf
 
 import (
 	"fmt"
@@ -9,32 +9,61 @@ import (
 
 func TestErrflow_TryErr(t *testing.T) {
 	fn := func() (err error) {
-		defer IfError().ThenAssignTo(&err)
-		TryErr(fmt.Errorf("error"))
+		defer IfError().ReturnWrapped().ThenAssignTo(&err)
+		defer With().TryErr(fmt.Errorf("error2"))
+		defer TryErr(fmt.Errorf("error1"))
 		return nil
 	}
 
-	assert.EqualError(t, fn(), "error")
+	assert.EqualError(t, fn(), "error1 (also: error2)")
+}
+
+func TestErrflow_TryErr_unrelatedPanic(t *testing.T) {
+	fn := func() (err error) {
+		defer IfError().ThenAssignTo(&err)
+		defer TryErr(fmt.Errorf("error"))
+		panic("hello")
+	}
+
+	assert.PanicsWithValue(t, "hello", func() {
+		fn()
+	})
 }
 
 func TestErrflow_TryAny(t *testing.T) {
 	fn := func() (err error) {
-		defer IfError().ThenAssignTo(&err)
-		assert.Equal(t, "value", TryAny("value", fmt.Errorf("error")))
+		defer IfError().ReturnWrapped().ThenAssignTo(&err)
+		defer With().TryAny("value", fmt.Errorf("error2"))
+		defer TryAny("value", fmt.Errorf("error1"))
+		defer assert.Equal(t, "value", TryAny("value", nil))
 		return nil
 	}
 
-	assert.EqualError(t, fn(), "error")
+	assert.EqualError(t, fn(), "error1 (also: error2)")
 }
 
 func TestErrflow_TryDiscard(t *testing.T) {
 	fn := func() (err error) {
-		defer IfError().ThenAssignTo(&err)
-		TryDiscard("value", fmt.Errorf("error"))
+		defer IfError().ReturnWrapped().ThenAssignTo(&err)
+		defer With().TryDiscard("value", fmt.Errorf("error2"))
+		defer TryDiscard("value", fmt.Errorf("error1"))
 		return nil
 	}
 
-	assert.EqualError(t, fn(), "error")
+	assert.EqualError(t, fn(), "error1 (also: error2)")
+}
+
+func TestErrflow_TryCondition(t *testing.T) {
+	fn := func() (err error) {
+		defer IfError().ReturnWrapped().ThenAssignTo(&err)
+		defer With().TryCondition(false, "error %d", 4)
+		defer With().TryCondition(true, "error %d", 3)
+		defer TryCondition(false, "error %d", 2)
+		defer TryCondition(true, "error %d", 1)
+		return nil
+	}
+
+	assert.EqualError(t, fn(), "error 1 (also: error 3)")
 }
 
 func TestErrflow_Log(t *testing.T) {
@@ -124,4 +153,8 @@ func TestErrflow_IfError_Apply(t *testing.T) {
 
 	assert.EqualError(t, fn(ReturnStrategyCombined),
 		"combined error {error1; error2; error3}")
+}
+
+func TestErrflow_TryErr_panics(t *testing.T) {
+
 }

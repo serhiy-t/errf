@@ -1,4 +1,4 @@
-package errflow
+package errf
 
 import (
 	"errors"
@@ -124,6 +124,23 @@ func TestCatcher_LogAlways(t *testing.T) {
 
 	fn()
 	assert.Equal(t, []string{"first", "second"}, logs)
+}
+
+func TestCatcher_LogIfSuppressed(t *testing.T) {
+	var logs []string
+	defer SetLogFn(func(m *LogMessage) {
+		logs = append(logs, fmt.Sprintf(m.Format, m.A...))
+	}).ThenRestore()
+
+	fn := func() (err error) {
+		defer IfError().LogIfSuppressed().ThenAssignTo(&err)
+		defer TryErr(fmt.Errorf("second"))
+		defer TryErr(fmt.Errorf("first"))
+		return nil
+	}
+
+	fn()
+	assert.Equal(t, []string{"second"}, logs)
 }
 
 func unrelatedPanicFn() {

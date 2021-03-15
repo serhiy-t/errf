@@ -1,4 +1,4 @@
-package errflow
+package errf
 
 import (
 	"fmt"
@@ -63,15 +63,17 @@ func SetStackTraceValidator() DeferRestorer {
 type validator interface {
 	enter()
 	leave()
+	markPanic()
 	validate()
 }
 
 type noopValidator struct {
 }
 
-func (v *noopValidator) enter()    {}
-func (v *noopValidator) leave()    {}
-func (v *noopValidator) validate() {}
+func (v *noopValidator) enter()     {}
+func (v *noopValidator) leave()     {}
+func (v *noopValidator) markPanic() {}
+func (v *noopValidator) validate()  {}
 
 type stackTraceValidator struct {
 }
@@ -84,12 +86,17 @@ func (v *stackTraceValidator) leave() {
 	getGoroutineErrflowStack().pop()
 }
 
+func (v *stackTraceValidator) markPanic() {
+	getGoroutineErrflowStack().markPanic = true
+}
+
 func (v *stackTraceValidator) validate() {
 	getGoroutineErrflowStack().validate()
 }
 
 type errflowStack struct {
-	stack []string
+	stack     []string
+	markPanic bool
 }
 
 func (s *errflowStack) push() {
@@ -99,44 +106,31 @@ func (s *errflowStack) push() {
 func (s *errflowStack) pop() {
 	s.validate()
 	s.stack = s.stack[:len(s.stack)-1]
+	s.markPanic = false
 	cleanupGoroutineErrflowStack()
 }
 
 func (s *errflowStack) validate() {
-	if len(s.stack) == 0 || s.stack[len(s.stack)-1] != getCurrentCallerFn() {
+	if s.markPanic {
+		return
+	}
+	currentCallerFn := getCurrentCallerFn()
+	if len(s.stack) == 0 || s.stack[len(s.stack)-1] != currentCallerFn {
 		panic(fmt.Errorf("errflow incorrect call sequence"))
 	}
 }
 
 func getCurrentCallerFn() string {
-	pc := make([]uintptr, 64)
-	pc = pc[:runtime.Callers(1, pc)]
-	frames := runtime.CallersFrames(pc)
-
-	for frame, next := frames.Next(); next; frame, next = frames.Next() {
-		// fn := fmt.Sprintf("%s:%d %s", frame.File, frame.Line, frame.Function)
-		fn := frame.Function
-		f := frame.File
-		if strings.HasPrefix(fn, "runtime") || strings.HasPrefix(fn, "testing") {
-			continue
-		}
-
-		if strings.HasSuffix(fn, "errflow.ImplementTry") {
-			if _, hasNext := frames.Next(); hasNext {
-				continue
-			} else {
-				break
-			}
-		}
-
-		if strings.Contains(fn, "errflow.") && !strings.HasSuffix(f, "_test.go") {
-			continue
-		}
-
-		return fn
+	parsedStack := getErrorStackTrace()
+	if len(parsedStack.Items) == 0 {
+		return "<unknown>"
 	}
-
-	return "<unknown>"
+	fn := parsedStack.Items[0].Fn
+	pIdx := strings.Index(fn, "(")
+	if pIdx != -1 {
+		fn = fn[:pIdx+1]
+	}
+	return fn
 }
 
 func (s *errflowStack) empty() bool {

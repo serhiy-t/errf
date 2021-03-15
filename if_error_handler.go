@@ -1,4 +1,4 @@
-package errflow
+package errf
 
 func IfError() *IfErrorHandler {
 	globalErrflowValidator.enter()
@@ -54,7 +54,20 @@ func (c *IfErrorHandler) Apply(options ...ErrflowOption) *IfErrorHandler {
 	return c
 }
 
+func isUnrelatedPanic(recoverObj interface{}) bool {
+	if recoverObj != nil {
+		_, ok := recoverObj.(errflowThrow)
+		if !ok {
+			return true
+		}
+	}
+	return false
+}
+
 func (c *IfErrorHandler) catch(recoverObj interface{}, fn func(err error)) {
+	if isUnrelatedPanic(recoverObj) {
+		globalErrflowValidator.markPanic()
+	}
 	globalErrflowValidator.leave()
 
 	if recoverObj != nil {
@@ -64,12 +77,15 @@ func (c *IfErrorHandler) catch(recoverObj interface{}, fn func(err error)) {
 			for _, item := range errflowThrow.items {
 				item.ef = item.ef.With(c.options...)
 				item.ef.applyDeferredOptions()
+				if item.ef.wrapper != nil && item.err != nil {
+					item.err = item.ef.wrapper(item.err)
+				}
 
 				if item.ef.logStrategy == logStrategyAlways {
 					globalLogFn(&LogMessage{
 						Format: "%s",
 						A:      []interface{}{item.err.Error()},
-						Stack:  getErrorStackTrace(),
+						Stack:  getStringErrorStackTraceFn(),
 						Tags:   []string{"errflow", "error"},
 					})
 				}
@@ -81,7 +97,7 @@ func (c *IfErrorHandler) catch(recoverObj interface{}, fn func(err error)) {
 						globalLogFn(&LogMessage{
 							Format: "%s",
 							A:      []interface{}{currItem.err.Error()},
-							Stack:  getErrorStackTrace(),
+							Stack:  getStringErrorStackTraceFn(),
 							Tags:   []string{"errflow", "suppressed-error"},
 						})
 					}
@@ -89,7 +105,7 @@ func (c *IfErrorHandler) catch(recoverObj interface{}, fn func(err error)) {
 						globalLogFn(&LogMessage{
 							Format: "%s",
 							A:      []interface{}{item.err.Error()},
-							Stack:  getErrorStackTrace(),
+							Stack:  getStringErrorStackTraceFn(),
 							Tags:   []string{"errflow", "suppressed-error"},
 						})
 					}

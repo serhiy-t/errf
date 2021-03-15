@@ -1,4 +1,4 @@
-package errflow
+package errf
 
 type logStrategy int
 
@@ -10,7 +10,7 @@ const (
 )
 
 func setLogStrategy(ef *Errflow, ls logStrategy) *Errflow {
-	newEf := ef.Copy()
+	newEf := ef.copy()
 	if ef.logStrategy == logStrategyDefault {
 		newEf.logStrategy = ls
 	}

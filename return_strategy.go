@@ -1,4 +1,4 @@
-package errflow
+package errf
 
 import (
 	"fmt"
@@ -9,6 +9,7 @@ type returnStrategy int
 
 const (
 	returnStrategyDefault = returnStrategy(iota)
+	returnStrategyUnknown
 	returnStrategyFirst
 	returnStrategyLast
 	returnStrategyWrapped
@@ -38,7 +39,7 @@ func getReturnStrategyImpl(rs returnStrategy) func(error, error) (result error, 
 }
 
 func setReturnStrategy(ef *Errflow, rs returnStrategy) *Errflow {
-	newEf := ef.Copy()
+	newEf := ef.copy()
 	if ef.returnStrategy == returnStrategyDefault {
 		newEf.returnStrategy = rs
 	}

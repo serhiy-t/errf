@@ -1,13 +1,23 @@
-package errflow
+package errf
 
 import "fmt"
 
 func Wrapper(wrapper func(err error) error) ErrflowOption {
 	return func(ef *Errflow) *Errflow {
-		newEf := ef.Copy()
-		newEf.wrapper = func(err error) error {
-			return wrapper(ef.wrapper(err))
+		if wrapper == nil {
+			return ef
 		}
+		newEf := ef.copy()
+		oldWrapper := ef.wrapper
+		newWrapper := wrapper
+
+		if oldWrapper != nil {
+			newWrapper = func(err error) error {
+				return wrapper(oldWrapper(err))
+			}
+		}
+
+		newEf.wrapper = newWrapper
 		return newEf
 	}
 }
@@ -27,7 +37,7 @@ func WrapperFmtErrorf(format string, a ...interface{}) ErrflowOption {
 	return Wrapper(fmtErrorf(format, a...))
 }
 
-func WrapperFmtErrorW(s string) ErrflowOption {
+func WrapperFmtErrorw(s string) ErrflowOption {
 	return WrapperFmtErrorf("%s: %w", s, OriginalErr)
 }
 

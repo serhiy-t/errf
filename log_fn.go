@@ -1,4 +1,4 @@
-package errflow
+package errf
 
 import (
 	"fmt"
@@ -8,22 +8,28 @@ import (
 
 type LogFn func(logMessage *LogMessage)
 
-var globalLogFn = func(logMessage *LogMessage) {
-	var buffer strings.Builder
+var globalLogFn = defaulGlobalLogFn(func(s string) {
+	log.Println(s)
+})
 
-	for _, tag := range logMessage.Tags {
-		fmt.Fprintf(&buffer, "[%s]", tag)
-	}
-	if buffer.Len() > 0 {
-		fmt.Fprintf(&buffer, " ")
-	}
+func defaulGlobalLogFn(printFn func(string)) LogFn {
+	return func(logMessage *LogMessage) {
+		var buffer strings.Builder
 
-	fmt.Fprintf(&buffer, logMessage.Format, logMessage.A...)
-	if len(logMessage.Stack) > 0 {
-		fmt.Fprintf(&buffer, "\n\nStack:\n%s", logMessage.Stack)
-	}
+		for _, tag := range logMessage.Tags {
+			fmt.Fprintf(&buffer, "[%s]", tag)
+		}
+		if buffer.Len() > 0 {
+			fmt.Fprintf(&buffer, " ")
+		}
 
-	log.Println(buffer.String())
+		fmt.Fprintf(&buffer, logMessage.Format, logMessage.A...)
+		if logMessage.Stack != nil {
+			fmt.Fprintf(&buffer, "\n\nStack:\n%s", logMessage.Stack())
+		}
+
+		printFn(buffer.String())
+	}
 }
 
 type logFnRestorer struct {
@@ -38,7 +44,7 @@ type LogMessage struct {
 	Format string
 	A      []interface{}
 
-	Stack string
+	Stack func() string
 	Tags  []string
 }
 

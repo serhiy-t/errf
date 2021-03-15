@@ -1,4 +1,4 @@
-package errflow
+package errf
 
 import (
 	"fmt"

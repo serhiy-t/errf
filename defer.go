@@ -1,4 +1,4 @@
-package errflow
+package errf
 
 import (
 	"fmt"
@@ -10,13 +10,16 @@ func (ef *Errflow) IfErrorAssignTo(outErr *error, err error) {
 		panic(fmt.Errorf("%v is not supported for IfErrorAssignTo(...)", ef.returnStrategy))
 	}
 	if err != nil {
+		if ef.wrapper != nil {
+			err = ef.wrapper(err)
+		}
 		if *outErr == nil {
 			*outErr = err
 			if ef.logStrategy == logStrategyAlways {
 				globalLogFn(&LogMessage{
 					Format: "%s",
 					A:      []interface{}{err.Error()},
-					Stack:  getErrorStackTrace(),
+					Stack:  getStringErrorStackTraceFn(),
 					Tags:   []string{"errflow", "error"},
 				})
 			}
@@ -27,7 +30,7 @@ func (ef *Errflow) IfErrorAssignTo(outErr *error, err error) {
 				globalLogFn(&LogMessage{
 					Format: "%s",
 					A:      []interface{}{err.Error()},
-					Stack:  getErrorStackTrace(),
+					Stack:  getStringErrorStackTraceFn(),
 					Tags:   []string{"errflow", "suppressed-error"},
 				})
 			}

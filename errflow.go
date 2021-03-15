@@ -1,4 +1,4 @@
-package errflow
+package errf
 
 import (
 	"fmt"
@@ -26,7 +26,7 @@ func (ef *Errflow) applyDeferredOptions() {
 	ef.deferredOptions = nil
 }
 
-func (ef *Errflow) Copy() *Errflow {
+func (ef *Errflow) copy() *Errflow {
 	return &Errflow{
 		wrapper:        ef.wrapper,
 		logStrategy:    ef.logStrategy,
@@ -39,7 +39,10 @@ func (ef *Errflow) Copy() *Errflow {
 type ErrflowOption func(errflowOptions *Errflow) *Errflow
 
 func (ef *Errflow) With(options ...ErrflowOption) *Errflow {
-	result := ef.Copy()
+	if ef == nil {
+		ef = DefaultErrflow
+	}
+	result := ef.copy()
 	result.deferredOptions = append([]ErrflowOption{}, ef.deferredOptions...)
 	result.deferredOptions = append(result.deferredOptions, options...)
 	return result
@@ -84,6 +87,9 @@ type errflowThrow struct {
 //     // ...
 //   }
 func (ef *Errflow) ImplementTry(recoverObj interface{}, err error) error {
+	if ef == nil {
+		ef = DefaultErrflow
+	}
 	globalErrflowValidator.validate()
 
 	var errflowThrowObj errflowThrow
@@ -152,11 +158,13 @@ func TryErr(err error) error {
 //    // Write to file ...
 //  }
 func (ef *Errflow) TryAny(value interface{}, err error) interface{} {
-	return ef.ImplementTry(recover(), err)
+	ef.ImplementTry(recover(), err)
+	return value
 }
 
 func TryAny(value interface{}, err error) interface{} {
-	return DefaultErrflow.ImplementTry(recover(), err)
+	DefaultErrflow.ImplementTry(recover(), err)
+	return value
 }
 
 // TryDiscard sends error to Catcher for processing, if there is an error.
@@ -197,7 +205,7 @@ func Log(err error) error {
 		globalLogFn(&LogMessage{
 			Format: "%s",
 			A:      []interface{}{err.Error()},
-			Stack:  getErrorStackTrace(),
+			Stack:  getStringErrorStackTraceFn(),
 			Tags:   []string{"errflow", "error"},
 		})
 	}

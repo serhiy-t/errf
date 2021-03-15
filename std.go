@@ -1,4 +1,4 @@
-package errflow
+package errf
 
 type StdErrflow struct {
 	errflow *Errflow
