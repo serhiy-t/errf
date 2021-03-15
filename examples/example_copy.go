@@ -10,6 +10,7 @@ import (
 	errf "github.com/serhiy-t/errflow"
 )
 
+// CopyFileErrflow copies file srcFilename into dstFilename.
 func CopyFileErrflow(dstFilename string, srcFilename string) (err error) {
 	defer errf.IfError().LogIfSuppressed().Apply(
 		errf.WrapperFmtErrorw("error copying file"),
@@ -36,6 +37,7 @@ func CopyFileErrflow(dstFilename string, srcFilename string) (err error) {
 		io.Copy(bufWriter, bufio.NewReader(reader)))
 }
 
+// CopyFilePlainGo copies file srcFilename into dstFilename.
 func CopyFilePlainGo(dstFilename string, srcFilename string) (err error) {
 	if len(dstFilename) == 0 {
 		return fmt.Errorf("error copying file: dst file should be specified")
@@ -90,6 +92,7 @@ func CopyFilePlainGo(dstFilename string, srcFilename string) (err error) {
 	return nil
 }
 
+// CopyFileErrflowNoPanics copies file srcFilename into dstFilename.
 func CopyFileErrflowNoPanics(dstFilename string, srcFilename string) (err error) {
 	if len(dstFilename) == 0 {
 		return fmt.Errorf("error copying file: dst file should be specified")
