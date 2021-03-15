@@ -13,7 +13,7 @@ func Test_Wrapper(t *testing.T) {
 			return fmt.Errorf("wrapped: %w", err)
 		})).ThenAssignTo(&err)
 
-		TryErr(fmt.Errorf("error1"))
+		CheckErr(fmt.Errorf("error1"))
 		return nil
 	}
 
@@ -28,7 +28,7 @@ func Test_NestedWrappers(t *testing.T) {
 
 		With(Wrapper(func(err error) error {
 			return fmt.Errorf("wrapped1: %w", err)
-		})).TryErr(fmt.Errorf("error1"))
+		})).CheckErr(fmt.Errorf("error1"))
 		return nil
 	}
 
@@ -50,7 +50,7 @@ func Test_Wrapper_nil(t *testing.T) {
 	fn := func() (err error) {
 		defer IfError().Apply(Wrapper(nil)).ThenAssignTo(&err)
 
-		TryErr(fmt.Errorf("error1"))
+		CheckErr(fmt.Errorf("error1"))
 		return nil
 	}
 
@@ -63,7 +63,7 @@ func Test_WrapperFmtErrorf(t *testing.T) {
 			WrapperFmtErrorf("wrapped: %w", OriginalErr),
 		).ThenAssignTo(&err)
 
-		TryErr(fmt.Errorf("error1"))
+		CheckErr(fmt.Errorf("error1"))
 		return nil
 	}
 
@@ -74,7 +74,7 @@ func Test_WrapperFmtErrorW(t *testing.T) {
 	fn := func() (err error) {
 		defer IfError().Apply(WrapperFmtErrorw("wrapped")).ThenAssignTo(&err)
 
-		TryErr(fmt.Errorf("error1"))
+		CheckErr(fmt.Errorf("error1"))
 		return nil
 	}
 

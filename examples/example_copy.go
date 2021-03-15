@@ -16,24 +16,24 @@ func CopyFileErrflow(dstFilename string, srcFilename string) (err error) {
 		errf.WrapperFmtErrorw("error copying file"),
 	).ThenAssignTo(&err)
 
-	errf.TryCondition(len(dstFilename) == 0, "dst file should be specified")
-	errf.TryCondition(len(srcFilename) == 0, "src file should be specified")
+	errf.CheckCondition(len(dstFilename) == 0, "dst file should be specified")
+	errf.CheckCondition(len(srcFilename) == 0, "src file should be specified")
 
-	reader := errf.Io.TryReadCloser(
+	reader := errf.Io.CheckReadCloser(
 		os.Open(srcFilename))
 	defer errf.Log(
 		reader.Close())
 
-	writer := errf.Io.TryWriteCloser(
+	writer := errf.Io.CheckWriteCloser(
 		os.Create(dstFilename))
-	defer errf.TryErr(
+	defer errf.CheckErr(
 		writer.Close())
 
 	bufWriter := bufio.NewWriter(writer)
-	defer errf.TryErr(
+	defer errf.CheckErr(
 		bufWriter.Flush())
 
-	return errf.TryDiscard(
+	return errf.CheckDiscard(
 		io.Copy(bufWriter, bufio.NewReader(reader)))
 }
 

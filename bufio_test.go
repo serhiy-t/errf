@@ -13,91 +13,91 @@ func Test_Bufio_With(t *testing.T) {
 
 	fn := func() (err error) {
 		defer IfError().ThenAssignTo(&err)
-		Bufio.With(WrapperFmtErrorw("wrapped")).TryWriter(value, fmt.Errorf("error"))
+		Bufio.With(WrapperFmtErrorw("wrapped")).CheckWriter(value, fmt.Errorf("error"))
 		return nil
 	}
 
 	assert.EqualError(t, fn(), "wrapped: error")
 }
 
-func Test_Bufio_TryBufioWriter(t *testing.T) {
+func Test_Bufio_CheckBufioWriter(t *testing.T) {
 	value := bufio.NewWriter(nil)
 
 	fn := func() (err error) {
 		defer IfError().ThenAssignTo(&err)
-		assert.Same(t, value, Bufio.TryWriter(value, nil))
-		Bufio.TryWriter(value, fmt.Errorf("error"))
+		assert.Same(t, value, Bufio.CheckWriter(value, nil))
+		Bufio.CheckWriter(value, fmt.Errorf("error"))
 		return nil
 	}
 
 	assert.EqualError(t, fn(), "error")
 }
 
-func Test_Bufio_TryBufioReader(t *testing.T) {
+func Test_Bufio_CheckBufioReader(t *testing.T) {
 	value := bufio.NewReader(nil)
 
 	fn := func() (err error) {
 		defer IfError().ThenAssignTo(&err)
-		assert.Same(t, value, Bufio.TryReader(value, nil))
-		Bufio.TryReader(value, fmt.Errorf("error"))
+		assert.Same(t, value, Bufio.CheckReader(value, nil))
+		Bufio.CheckReader(value, fmt.Errorf("error"))
 		return nil
 	}
 
 	assert.EqualError(t, fn(), "error")
 }
 
-func Test_Bufio_TryBufioReadWriter(t *testing.T) {
+func Test_Bufio_CheckBufioReadWriter(t *testing.T) {
 	value := bufio.NewReadWriter(nil, nil)
 
 	fn := func() (err error) {
 		defer IfError().ThenAssignTo(&err)
-		assert.Same(t, value, Bufio.TryReadWriter(value, nil))
-		Bufio.TryReadWriter(value, fmt.Errorf("error"))
+		assert.Same(t, value, Bufio.CheckReadWriter(value, nil))
+		Bufio.CheckReadWriter(value, fmt.Errorf("error"))
 		return nil
 	}
 
 	assert.EqualError(t, fn(), "error")
 }
 
-func Test_Bufio_TryBufioWriterErr(t *testing.T) {
+func Test_Bufio_CheckBufioWriterErr(t *testing.T) {
 	value := bufio.NewWriter(nil)
 
 	fn := func() (err error) {
 		defer IfError().ThenAssignTo(&err)
-		actual, tryErr := Bufio.TryWriterErr(value, nil)
+		actual, checkErr := Bufio.CheckWriterErr(value, nil)
 		assert.Same(t, value, actual)
-		assert.Nil(t, tryErr)
-		Bufio.TryWriterErr(value, fmt.Errorf("error"))
+		assert.Nil(t, checkErr)
+		Bufio.CheckWriterErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
 	assert.EqualError(t, fn(), "error")
 }
 
-func Test_Bufio_TryBufioReaderErr(t *testing.T) {
+func Test_Bufio_CheckBufioReaderErr(t *testing.T) {
 	value := bufio.NewReader(nil)
 
 	fn := func() (err error) {
 		defer IfError().ThenAssignTo(&err)
-		actual, tryErr := Bufio.TryReaderErr(value, nil)
+		actual, checkErr := Bufio.CheckReaderErr(value, nil)
 		assert.Same(t, value, actual)
-		assert.Nil(t, tryErr)
-		Bufio.TryReaderErr(value, fmt.Errorf("error"))
+		assert.Nil(t, checkErr)
+		Bufio.CheckReaderErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
 	assert.EqualError(t, fn(), "error")
 }
 
-func Test_Bufio_TryBufioReadWriterErr(t *testing.T) {
+func Test_Bufio_CheckBufioReadWriterErr(t *testing.T) {
 	value := bufio.NewReadWriter(nil, nil)
 
 	fn := func() (err error) {
 		defer IfError().ThenAssignTo(&err)
-		actual, tryErr := Bufio.TryReadWriterErr(value, nil)
+		actual, checkErr := Bufio.CheckReadWriterErr(value, nil)
 		assert.Same(t, value, actual)
-		assert.Nil(t, tryErr)
-		Bufio.TryReadWriterErr(value, fmt.Errorf("error"))
+		assert.Nil(t, checkErr)
+		Bufio.CheckReadWriterErr(value, fmt.Errorf("error"))
 		return nil
 	}
 

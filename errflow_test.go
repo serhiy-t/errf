@@ -7,21 +7,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestErrflow_TryErr(t *testing.T) {
+func TestErrflow_CheckErr(t *testing.T) {
 	fn := func() (err error) {
 		defer IfError().ReturnWrapped().ThenAssignTo(&err)
-		defer With().TryErr(fmt.Errorf("error2"))
-		defer TryErr(fmt.Errorf("error1"))
+		defer With().CheckErr(fmt.Errorf("error2"))
+		defer CheckErr(fmt.Errorf("error1"))
 		return nil
 	}
 
 	assert.EqualError(t, fn(), "error1 (also: error2)")
 }
 
-func TestErrflow_TryErr_unrelatedPanic(t *testing.T) {
+func TestErrflow_CheckErr_unrelatedPanic(t *testing.T) {
 	fn := func() (err error) {
 		defer IfError().ThenAssignTo(&err)
-		defer TryErr(fmt.Errorf("error"))
+		defer CheckErr(fmt.Errorf("error"))
 		panic("hello")
 	}
 
@@ -30,36 +30,36 @@ func TestErrflow_TryErr_unrelatedPanic(t *testing.T) {
 	})
 }
 
-func TestErrflow_TryAny(t *testing.T) {
+func TestErrflow_CheckAny(t *testing.T) {
 	fn := func() (err error) {
 		defer IfError().ReturnWrapped().ThenAssignTo(&err)
-		defer With().TryAny("value", fmt.Errorf("error2"))
-		defer TryAny("value", fmt.Errorf("error1"))
-		defer assert.Equal(t, "value", TryAny("value", nil))
+		defer With().CheckAny("value", fmt.Errorf("error2"))
+		defer CheckAny("value", fmt.Errorf("error1"))
+		defer assert.Equal(t, "value", CheckAny("value", nil))
 		return nil
 	}
 
 	assert.EqualError(t, fn(), "error1 (also: error2)")
 }
 
-func TestErrflow_TryDiscard(t *testing.T) {
+func TestErrflow_CheckDiscard(t *testing.T) {
 	fn := func() (err error) {
 		defer IfError().ReturnWrapped().ThenAssignTo(&err)
-		defer With().TryDiscard("value", fmt.Errorf("error2"))
-		defer TryDiscard("value", fmt.Errorf("error1"))
+		defer With().CheckDiscard("value", fmt.Errorf("error2"))
+		defer CheckDiscard("value", fmt.Errorf("error1"))
 		return nil
 	}
 
 	assert.EqualError(t, fn(), "error1 (also: error2)")
 }
 
-func TestErrflow_TryCondition(t *testing.T) {
+func TestErrflow_CheckCondition(t *testing.T) {
 	fn := func() (err error) {
 		defer IfError().ReturnWrapped().ThenAssignTo(&err)
-		defer With().TryCondition(false, "error %d", 4)
-		defer With().TryCondition(true, "error %d", 3)
-		defer TryCondition(false, "error %d", 2)
-		defer TryCondition(true, "error %d", 1)
+		defer With().CheckCondition(false, "error %d", 4)
+		defer With().CheckCondition(true, "error %d", 3)
+		defer CheckCondition(false, "error %d", 2)
+		defer CheckCondition(true, "error %d", 1)
 		return nil
 	}
 
@@ -86,7 +86,7 @@ func TestErrflow_ErrorIf(t *testing.T) {
 	fn := func(returnErr bool) (err error) {
 		defer IfError().ThenAssignTo(&err)
 
-		return TryCondition(returnErr, "test error")
+		return CheckCondition(returnErr, "test error")
 	}
 
 	assert.Nil(t, fn(false))
@@ -102,10 +102,10 @@ func TestErrflow_Error_With(t *testing.T) {
 	fn := func(options ...ErrflowOption) (err error) {
 		defer IfError().ThenAssignTo(&err)
 
-		defer With(options...).TryErr(fmt.Errorf("error3"))
-		defer With(options...).TryErr(fmt.Errorf("error2"))
+		defer With(options...).CheckErr(fmt.Errorf("error3"))
+		defer With(options...).CheckErr(fmt.Errorf("error2"))
 
-		return With(options...).TryErr(fmt.Errorf("error1"))
+		return With(options...).CheckErr(fmt.Errorf("error1"))
 	}
 
 	assert.EqualError(t, fn(ReturnStrategyFirst, LogStrategyAlways), "error1")
@@ -133,10 +133,10 @@ func TestErrflow_IfError_Apply(t *testing.T) {
 	fn := func(options ...ErrflowOption) (err error) {
 		defer IfError().Apply(options...).ThenAssignTo(&err)
 
-		defer TryErr(fmt.Errorf("error3"))
-		defer TryErr(fmt.Errorf("error2"))
+		defer CheckErr(fmt.Errorf("error3"))
+		defer CheckErr(fmt.Errorf("error2"))
 
-		return TryErr(fmt.Errorf("error1"))
+		return CheckErr(fmt.Errorf("error1"))
 	}
 
 	assert.EqualError(t, fn(ReturnStrategyFirst, LogStrategyAlways), "error1")

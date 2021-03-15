@@ -11,7 +11,7 @@ import (
 func TestCatcher_ThenAssignTo(t *testing.T) {
 	fn := func(returnErr error) (err error) {
 		defer IfError().ThenAssignTo(&err)
-		return TryErr(returnErr)
+		return CheckErr(returnErr)
 	}
 
 	assert.Nil(t, fn(nil))
@@ -22,7 +22,7 @@ func TestCatcher_Then(t *testing.T) {
 	var outErr error
 	fn := func(returnErr error) {
 		defer IfError().Then(func(err error) { outErr = err })
-		TryErr(returnErr)
+		CheckErr(returnErr)
 	}
 
 	fn(nil)
@@ -34,7 +34,7 @@ func TestCatcher_Then(t *testing.T) {
 func TestCatcher_ThenIgnore(t *testing.T) {
 	fn := func(returnErr error) (err error) {
 		defer IfError().ThenIgnore()
-		return TryErr(returnErr)
+		return CheckErr(returnErr)
 	}
 
 	assert.Nil(t, fn(nil))
@@ -44,8 +44,8 @@ func TestCatcher_ThenIgnore(t *testing.T) {
 func TestCatcher_ReturnFirst(t *testing.T) {
 	fn := func() (err error) {
 		defer IfError().ReturnFirst().ThenAssignTo(&err)
-		defer TryErr(fmt.Errorf("second"))
-		defer TryErr(fmt.Errorf("first"))
+		defer CheckErr(fmt.Errorf("second"))
+		defer CheckErr(fmt.Errorf("first"))
 		return nil
 	}
 
@@ -55,8 +55,8 @@ func TestCatcher_ReturnFirst(t *testing.T) {
 func TestCatcher_ReturnLast(t *testing.T) {
 	fn := func() (err error) {
 		defer IfError().ReturnLast().ThenAssignTo(&err)
-		defer TryErr(fmt.Errorf("second"))
-		defer TryErr(fmt.Errorf("first"))
+		defer CheckErr(fmt.Errorf("second"))
+		defer CheckErr(fmt.Errorf("first"))
 		return nil
 	}
 
@@ -66,8 +66,8 @@ func TestCatcher_ReturnLast(t *testing.T) {
 func TestCatcher_ReturnWrapped(t *testing.T) {
 	fn := func() (err error) {
 		defer IfError().ReturnWrapped().ThenAssignTo(&err)
-		defer TryErr(fmt.Errorf("second"))
-		defer TryErr(fmt.Errorf("first"))
+		defer CheckErr(fmt.Errorf("second"))
+		defer CheckErr(fmt.Errorf("first"))
 		return nil
 	}
 
@@ -79,8 +79,8 @@ func TestCatcher_ReturnWrapped(t *testing.T) {
 func TestCatcher_ReturnCombined(t *testing.T) {
 	fn := func() (err error) {
 		defer IfError().ReturnCombined().ThenAssignTo(&err)
-		defer TryErr(fmt.Errorf("second"))
-		defer TryErr(fmt.Errorf("first"))
+		defer CheckErr(fmt.Errorf("second"))
+		defer CheckErr(fmt.Errorf("first"))
 		return nil
 	}
 
@@ -100,8 +100,8 @@ func TestCatcher_LogNever(t *testing.T) {
 
 	fn := func() (err error) {
 		defer IfError().LogNever().ThenAssignTo(&err)
-		defer TryErr(fmt.Errorf("second"))
-		defer TryErr(fmt.Errorf("first"))
+		defer CheckErr(fmt.Errorf("second"))
+		defer CheckErr(fmt.Errorf("first"))
 		return nil
 	}
 
@@ -117,8 +117,8 @@ func TestCatcher_LogAlways(t *testing.T) {
 
 	fn := func() (err error) {
 		defer IfError().LogAlways().ThenAssignTo(&err)
-		defer TryErr(fmt.Errorf("second"))
-		defer TryErr(fmt.Errorf("first"))
+		defer CheckErr(fmt.Errorf("second"))
+		defer CheckErr(fmt.Errorf("first"))
 		return nil
 	}
 
@@ -134,8 +134,8 @@ func TestCatcher_LogIfSuppressed(t *testing.T) {
 
 	fn := func() (err error) {
 		defer IfError().LogIfSuppressed().ThenAssignTo(&err)
-		defer TryErr(fmt.Errorf("second"))
-		defer TryErr(fmt.Errorf("first"))
+		defer CheckErr(fmt.Errorf("second"))
+		defer CheckErr(fmt.Errorf("first"))
 		return nil
 	}
 

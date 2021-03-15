@@ -24,119 +24,119 @@ func Test_Io_With(t *testing.T) {
 
 	fn := func() (err error) {
 		defer IfError().ThenAssignTo(&err)
-		Io.With(WrapperFmtErrorw("wrapped")).TryWriter(value, fmt.Errorf("error"))
+		Io.With(WrapperFmtErrorw("wrapped")).CheckWriter(value, fmt.Errorf("error"))
 		return nil
 	}
 
 	assert.EqualError(t, fn(), "wrapped: error")
 }
 
-func Test_Io_TryWriter(t *testing.T) {
+func Test_Io_CheckWriter(t *testing.T) {
 	value := &IoWriteReadCloser{}
 
 	fn := func() (err error) {
 		defer IfError().ThenAssignTo(&err)
-		assert.Same(t, value, Io.TryWriter(value, nil))
-		Io.TryWriter(value, fmt.Errorf("error"))
+		assert.Same(t, value, Io.CheckWriter(value, nil))
+		Io.CheckWriter(value, fmt.Errorf("error"))
 		return nil
 	}
 
 	assert.EqualError(t, fn(), "error")
 }
 
-func Test_Io_TryWriteCloser(t *testing.T) {
+func Test_Io_CheckWriteCloser(t *testing.T) {
 	value := &IoWriteReadCloser{}
 
 	fn := func() (err error) {
 		defer IfError().ThenAssignTo(&err)
-		assert.Same(t, value, Io.TryWriteCloser(value, nil))
-		Io.TryWriteCloser(value, fmt.Errorf("error"))
+		assert.Same(t, value, Io.CheckWriteCloser(value, nil))
+		Io.CheckWriteCloser(value, fmt.Errorf("error"))
 		return nil
 	}
 
 	assert.EqualError(t, fn(), "error")
 }
 
-func Test_Io_TryReader(t *testing.T) {
+func Test_Io_CheckReader(t *testing.T) {
 	value := &IoWriteReadCloser{}
 
 	fn := func() (err error) {
 		defer IfError().ThenAssignTo(&err)
-		assert.Same(t, value, Io.TryReader(value, nil))
-		Io.TryReader(value, fmt.Errorf("error"))
+		assert.Same(t, value, Io.CheckReader(value, nil))
+		Io.CheckReader(value, fmt.Errorf("error"))
 		return nil
 	}
 
 	assert.EqualError(t, fn(), "error")
 }
 
-func Test_Io_TryReadCloser(t *testing.T) {
+func Test_Io_CheckReadCloser(t *testing.T) {
 	value := &IoWriteReadCloser{}
 
 	fn := func() (err error) {
 		defer IfError().ThenAssignTo(&err)
-		assert.Same(t, value, Io.TryReadCloser(value, nil))
-		Io.TryReadCloser(value, fmt.Errorf("error"))
+		assert.Same(t, value, Io.CheckReadCloser(value, nil))
+		Io.CheckReadCloser(value, fmt.Errorf("error"))
 		return nil
 	}
 
 	assert.EqualError(t, fn(), "error")
 }
 
-func Test_Io_TryWriterErr(t *testing.T) {
+func Test_Io_CheckWriterErr(t *testing.T) {
 	value := &IoWriteReadCloser{}
 
 	fn := func() (err error) {
 		defer IfError().ThenAssignTo(&err)
-		actual, tryErr := Io.TryWriterErr(value, nil)
+		actual, checkErr := Io.CheckWriterErr(value, nil)
 		assert.Same(t, value, actual)
-		assert.Nil(t, tryErr)
-		Io.TryWriterErr(value, fmt.Errorf("error"))
+		assert.Nil(t, checkErr)
+		Io.CheckWriterErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
 	assert.EqualError(t, fn(), "error")
 }
 
-func Test_Io_TryWriteCloserErr(t *testing.T) {
+func Test_Io_CheckWriteCloserErr(t *testing.T) {
 	value := &IoWriteReadCloser{}
 
 	fn := func() (err error) {
 		defer IfError().ThenAssignTo(&err)
-		actual, tryErr := Io.TryWriteCloserErr(value, nil)
+		actual, checkErr := Io.CheckWriteCloserErr(value, nil)
 		assert.Same(t, value, actual)
-		assert.Nil(t, tryErr)
-		Io.TryWriteCloserErr(value, fmt.Errorf("error"))
+		assert.Nil(t, checkErr)
+		Io.CheckWriteCloserErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
 	assert.EqualError(t, fn(), "error")
 }
 
-func Test_Io_TryReaderErr(t *testing.T) {
+func Test_Io_CheckReaderErr(t *testing.T) {
 	value := &IoWriteReadCloser{}
 
 	fn := func() (err error) {
 		defer IfError().ThenAssignTo(&err)
-		actual, tryErr := Io.TryReaderErr(value, nil)
+		actual, checkErr := Io.CheckReaderErr(value, nil)
 		assert.Same(t, value, actual)
-		assert.Nil(t, tryErr)
-		Io.TryReaderErr(value, fmt.Errorf("error"))
+		assert.Nil(t, checkErr)
+		Io.CheckReaderErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
 	assert.EqualError(t, fn(), "error")
 }
 
-func Test_Io_TryReadCloserErr(t *testing.T) {
+func Test_Io_CheckReadCloserErr(t *testing.T) {
 	value := &IoWriteReadCloser{}
 
 	fn := func() (err error) {
 		defer IfError().ThenAssignTo(&err)
-		actual, tryErr := Io.TryReadCloserErr(value, nil)
+		actual, checkErr := Io.CheckReadCloserErr(value, nil)
 		assert.Same(t, value, actual)
-		assert.Nil(t, tryErr)
-		Io.TryReadCloserErr(value, fmt.Errorf("error"))
+		assert.Nil(t, checkErr)
+		Io.CheckReadCloserErr(value, fmt.Errorf("error"))
 		return nil
 	}
 

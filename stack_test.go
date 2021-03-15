@@ -23,11 +23,11 @@ func Test_getErrorStackTrace_panicErrors(t *testing.T) {
 
 	fn := func() error {
 		defer IfError().LogAlways().ThenIgnore()
-		defer TryErr(
+		defer CheckErr(
 			fmt.Errorf("error 3"))
-		defer TryErr(
+		defer CheckErr(
 			fmt.Errorf("error 2"))
-		TryErr(fmt.Errorf("error 1"))
+		CheckErr(fmt.Errorf("error 1"))
 		return nil
 	}
 

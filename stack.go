@@ -44,7 +44,7 @@ func getErrorStackTrace() parsedStack {
 			strings.HasPrefix(lines[idx], "panic(") {
 			continue
 		}
-		if strings.Contains(lines[idx], "/errf.(*Errflow).ImplementTry(") {
+		if strings.Contains(lines[idx], "/errf.(*Errflow).ImplementCheck(") {
 			idx += 2
 			continue
 		}

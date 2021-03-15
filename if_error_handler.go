@@ -79,7 +79,7 @@ func (c *IfErrorHandler) LogNever() *IfErrorHandler {
 //  func example() (err error) {
 //  	defer errf.IfError().Apply(errf.WrapperFmtErrorw("wrapper 2")).ThenAssignTo(&err)
 //
-//  	With(errf.WrapperFmtErrorw("wrapper 1")).TryErr(fmt.Errorf("error 1"))
+//  	With(errf.WrapperFmtErrorw("wrapper 1")).CheckErr(fmt.Errorf("error 1"))
 //  	return nil
 //  }
 //

@@ -94,7 +94,7 @@ type errflowThrow struct {
 	items []errflowThrowItem
 }
 
-// ImplementTry is used to implement a strongly-typed errflow.Try(...) for new types.
+// ImplementCheck is used to implement a strongly-typed errflow.Check(...) for new types.
 //
 // Example:
 //  package fancypackage
@@ -109,13 +109,13 @@ type errflowThrow struct {
 //  	return FancyPackageErrflow{errflow: errf.errflow.With(options...)}
 //  }
 //
-//  func (ef FancyPackageErrflow) TryCustomType1(value *CustomType1, err error) *CustomType1 {
-//  	errf.errflow.ImplementTry(recover(), err)
+//  func (ef FancyPackageErrflow) CheckCustomType1(value *CustomType1, err error) *CustomType1 {
+//  	errf.errflow.ImplementCheck(recover(), err)
 //  	return value
 //  }
 //
-//  func (ef FancyPackageErrflow) TryCustomType2(value *CustomType2, err error) *CustomType2 {
-//  	errf.errflow.ImplementTry(recover(), err)
+//  func (ef FancyPackageErrflow) CheckCustomType2(value *CustomType2, err error) *CustomType2 {
+//  	errf.errflow.ImplementCheck(recover(), err)
 //  	return value
 //  }
 //
@@ -124,12 +124,12 @@ type errflowThrow struct {
 //  func ProcessCustomStruct() (err error) {
 //  	defer errflow.IfError().ThenAssignTo(&err)
 //
-//  	customStructValue := fancypackage.Errf.TryCustomStruct(
+//  	customStructValue := fancypackage.Errf.CheckCustomStruct(
 //  		fancypackage.ReadCustomStruct())
 //
 //  	// ...
 //  }
-func (ef *Errflow) ImplementTry(recoverObj interface{}, err error) error {
+func (ef *Errflow) ImplementCheck(recoverObj interface{}, err error) error {
 	if ef == nil {
 		ef = DefaultErrflow
 	}
@@ -156,91 +156,91 @@ func (ef *Errflow) ImplementTry(recoverObj interface{}, err error) error {
 	return err
 }
 
-// TryErr sends error to IfError() handler for processing, if there is an error.
+// CheckErr sends error to IfError() handler for processing, if there is an error.
 //
 // It is required that 'defer errf.IfError().Then...' is configured in the same
-// function as TryErr, otherwise validation will fail when running tests.
+// function as CheckErr, otherwise validation will fail when running tests.
 //
-// TryErr always returns nil, but type system allows using it to skip return nil statement:
-//   errflow.TryErr(functionCall())
+// CheckErr always returns nil, but type system allows using it to skip return nil statement:
+//   errflow.CheckErr(functionCall())
 //   return nil
 // is the same as:
-//   return errflow.TryErr(functionCall())
-func (ef *Errflow) TryErr(err error) error {
-	return ef.ImplementTry(recover(), err)
+//   return errflow.CheckErr(functionCall())
+func (ef *Errflow) CheckErr(err error) error {
+	return ef.ImplementCheck(recover(), err)
 }
 
-// TryErr is an alias for DefaultErrflow.TryErr(...).
-func TryErr(err error) error {
-	return DefaultErrflow.ImplementTry(recover(), err)
+// CheckErr is an alias for DefaultErrflow.CheckErr(...).
+func CheckErr(err error) error {
+	return DefaultErrflow.ImplementCheck(recover(), err)
 }
 
-// TryAny sends error to Catcher for processing, if there is an error.
+// CheckAny sends error to Catcher for processing, if there is an error.
 // If there is no error, it returns value as a generic interface{}.
 //
 // Example:
 //  function ProcessFile() (err error) {
 //    defer errf.IfError().ThenAssignTo(&err)
 //
-//    file := errf.TryAny(os.Create("file.go")).(*os.File)
-//    defer errf.TryErr(file.Close())
+//    file := errf.CheckAny(os.Create("file.go")).(*os.File)
+//    defer errf.CheckErr(file.Close())
 //
 //    // Write to file ...
 //  }
 //
 // Tip: prefer using typed functions, defined in either this library, or
-// custom ones, implemented using errf.ImplementTry(...).
+// custom ones, implemented using errf.ImplementCheck(...).
 //
 // Example above can usually rewritten as:
 //  function ProcessFile() (err error) {
 //    defer errf.IfError().ThenAssignTo(&err)
 //
-//    writer := errf.Io.TryWriteCloser(os.Create("file.go"))
-//    defer errf.TryErr(writer.Close())
+//    writer := errf.Io.CheckWriteCloser(os.Create("file.go"))
+//    defer errf.CheckErr(writer.Close())
 //
 //    // Write to file ...
 //  }
-func (ef *Errflow) TryAny(value interface{}, err error) interface{} {
-	ef.ImplementTry(recover(), err)
+func (ef *Errflow) CheckAny(value interface{}, err error) interface{} {
+	ef.ImplementCheck(recover(), err)
 	return value
 }
 
-// TryAny is an alias for DefaultErrflow.TryAny(...).
-func TryAny(value interface{}, err error) interface{} {
-	DefaultErrflow.ImplementTry(recover(), err)
+// CheckAny is an alias for DefaultErrflow.CheckAny(...).
+func CheckAny(value interface{}, err error) interface{} {
+	DefaultErrflow.ImplementCheck(recover(), err)
 	return value
 }
 
-// TryDiscard sends error to IfError() handler for processing, if there is an error.
+// CheckDiscard sends error to IfError() handler for processing, if there is an error.
 // Non-error value returned from a function is discarded.
 //
 // Example:
 //  function writeBuf(w io.Writer, buf []byte) (err error) {
 //    defer errf.IfError().ThenAssignTo(&err)
 //
-//    return errf.TryDiscard(w.Write(buf))
+//    return errf.CheckDiscard(w.Write(buf))
 //  }
-func (ef *Errflow) TryDiscard(value interface{}, err error) error {
-	return ef.ImplementTry(recover(), err)
+func (ef *Errflow) CheckDiscard(value interface{}, err error) error {
+	return ef.ImplementCheck(recover(), err)
 }
 
-// TryDiscard is an alias for DefaultErrflow.TryDiscard(...).
-func TryDiscard(value interface{}, err error) error {
-	return DefaultErrflow.ImplementTry(recover(), err)
+// CheckDiscard is an alias for DefaultErrflow.CheckDiscard(...).
+func CheckDiscard(value interface{}, err error) error {
+	return DefaultErrflow.ImplementCheck(recover(), err)
 }
 
-// TryCondition creates and sends error to IfError() handler for processing, if condition is true.
-func (ef *Errflow) TryCondition(condition bool, format string, a ...interface{}) error {
+// CheckCondition creates and sends error to IfError() handler for processing, if condition is true.
+func (ef *Errflow) CheckCondition(condition bool, format string, a ...interface{}) error {
 	if condition {
-		return ef.ImplementTry(recover(), fmt.Errorf(format, a...))
+		return ef.ImplementCheck(recover(), fmt.Errorf(format, a...))
 	}
 	return nil
 }
 
-// TryCondition is an alias for DefaultErrflow.TryCondition(...).
-func TryCondition(condition bool, format string, a ...interface{}) error {
+// CheckCondition is an alias for DefaultErrflow.CheckCondition(...).
+func CheckCondition(condition bool, format string, a ...interface{}) error {
 	if condition {
-		return DefaultErrflow.ImplementTry(recover(), fmt.Errorf(format, a...))
+		return DefaultErrflow.ImplementCheck(recover(), fmt.Errorf(format, a...))
 	}
 	return nil
 }
