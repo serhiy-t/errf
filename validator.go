@@ -35,12 +35,12 @@ func setValidator(v validator) DeferRestorer {
 // SetNoopValidator sets no-op validator for errflow.
 //
 // Validator is used to validate that the library is used correctly,
-// meaning each used is limited to a single function.
+// meaning each usage is limited to a single function.
 //
 // This is a default mode for production, which doesn't compromise performance,
 // but library can be misused in this mode.
 //
-// It returns errflow.DeferRestorer instance,
+// It returns errf.DeferRestorer instance,
 // which can be used to restore previous validator, if needed.
 func SetNoopValidator() DeferRestorer {
 	return setValidator(&noopValidator{})
@@ -49,12 +49,12 @@ func SetNoopValidator() DeferRestorer {
 // SetStackTraceValidator sets a stack-trace based validator for errflow.
 //
 // Validator is used to validate that the library is used correctly,
-// meaning each used is limited to a single function.
+// meaning each usage is limited to a single function.
 //
 // This is a default mode for tests, which works in most cases, but
 // has performance penalty and might return false positives in some cases.
 //
-// It returns errflow.DeferRestorer instance,
+// It returns errf.DeferRestorer instance,
 // which can be used to restore previous validator, if needed.
 func SetStackTraceValidator() DeferRestorer {
 	return setValidator(&stackTraceValidator{})
@@ -122,10 +122,10 @@ func (s *errflowStack) validate() {
 
 func getCurrentCallerFn() string {
 	parsedStack := getErrorStackTrace()
-	if len(parsedStack.Items) == 0 {
+	if len(parsedStack.items) == 0 {
 		return "<unknown>"
 	}
-	fn := parsedStack.Items[0].Fn
+	fn := parsedStack.items[0].fn
 	pIdx := strings.Index(fn, "(")
 	if pIdx != -1 {
 		fn = fn[:pIdx+1]

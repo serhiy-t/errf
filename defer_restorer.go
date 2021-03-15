@@ -1,7 +1,8 @@
 package errf
 
 // DeferRestorer is helper interface to update global config in a
-// scope of a single function, typically useful for testing or for main function configuration.
+// scope of a single function, typically useful for testing or
+// for main function configuration.
 //
 // Example:
 //   func Test1(t *testing.Test) {

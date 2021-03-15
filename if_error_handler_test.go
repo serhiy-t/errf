@@ -158,31 +158,3 @@ func TestCatcher_UnrelatedPanic(t *testing.T) {
 		fn()
 	})
 }
-
-// func TestCatcher_UnrelatedPanicStacktrace(t *testing.T) {
-// 	fn := func() (err error) {
-// 		defer IfError().ThenAssignTo(&err)
-// 		unrelatedPanicFn()
-// 		return nil
-// 	}
-
-// 	defer func() {
-// 		recover()
-// 		assert.Contains(t, string(debug.Stack()), "unrelatedPanicFn")
-// 	}()
-
-// 	fn()
-// }
-
-// func TestCatcher_UnrelatedPanicMultipleErrors(t *testing.T) {
-// 	fn := func() (err error) {
-// 		defer IfError().ReturnFirst().ThenAssignTo(&err)
-// 		defer TryErr(fmt.Errorf("second"))
-// 		defer TryErr(fmt.Errorf("first"))
-// 		panic(fmt.Errorf("unrelated panic"))
-// 	}
-
-// 	assert.PanicsWithError(t, "unrelated panic", func() {
-// 		fn()
-// 	})
-// }

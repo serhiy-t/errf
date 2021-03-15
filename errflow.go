@@ -4,11 +4,12 @@ import (
 	"fmt"
 )
 
+// DefaultErrflow is default Errflow instance.
+// Clients should never set its value.
 var DefaultErrflow = &Errflow{}
-var Io = IoErrflow{}
-var Bufio = BufioErrflow{}
-var Std = StdErrflow{}
 
+// Errflow contains configuration for error hanlding logic.
+// It exposes an immutable API for clients, but it is not thread-safe.
 type Errflow struct {
 	wrapper func(err error) error
 	logStrategy
@@ -36,8 +37,24 @@ func (ef *Errflow) copy() *Errflow {
 	}
 }
 
-type ErrflowOption func(errflowOptions *Errflow) *Errflow
+// ErrflowOption is used for extending config API.
+// Clients can extend config API with new methods by implementing ErrflowOption.
+//
+// Example:
+//  func WrapInOurError(ef *Errflow) *Errflow {
+//  	return ef.With(errf.Wrapper(func (err error) error {
+//  		return ourerrors.Wrap(err)
+//  	}))
+//  }
+//
+//  func exampleUsage() (err error) {
+//  	defer errf.IfError().Apply(WrapInOurError).ThenAssignTo(&err)
+//  	// ...
+//  }
+type ErrflowOption func(ef *Errflow) *Errflow
 
+// With adds additional configs to Errflow instance.
+// It returns a new instance. Original instance is unmodified.
 func (ef *Errflow) With(options ...ErrflowOption) *Errflow {
 	if ef == nil {
 		ef = DefaultErrflow
@@ -48,6 +65,7 @@ func (ef *Errflow) With(options ...ErrflowOption) *Errflow {
 	return result
 }
 
+// With is an alias for DefaultErrflow.With(...).
 func With(options ...ErrflowOption) *Errflow {
 	return DefaultErrflow.With(options...)
 }
@@ -61,31 +79,41 @@ type errflowThrow struct {
 	items []errflowThrowItem
 }
 
-// ImplementTry is used to implement a strongly-typed errflow.Try(...)
-// for processing function return values for custom types.
+// ImplementTry is used to implement a strongly-typed errflow.Try(...) for new types.
 //
 // Example:
-//   package fancypackage
+//  package fancypackage
 //
-//   type CustomStruct struct { ... }
+//  var Errf = FancyPackageErrflow{}
 //
-//   func ErrflowCustomStruct(value *CustomStruct, err error) *CustomStruct {
-//     ImplementTry(recover(), err)
-//     return value
-//   }
+//  type FancyPackageErrflow struct {
+//  	errflow *Errflow
+//  }
 //
-//   func ReadCustomStruct() (*CustomStruct, error) { ... }
+//  func (ef FancyPackageErrflow) With(options ...ErrflowOption) FancyPackageErrflow {
+//  	return FancyPackageErrflow{errflow: errf.errflow.With(options...)}
+//  }
 //
+//  func (ef FancyPackageErrflow) TryCustomType1(value *CustomType1, err error) *CustomType1 {
+//  	errf.errflow.ImplementTry(recover(), err)
+//  	return value
+//  }
 //
-//   package main
+//  func (ef FancyPackageErrflow) TryCustomType2(value *CustomType2, err error) *CustomType2 {
+//  	errf.errflow.ImplementTry(recover(), err)
+//  	return value
+//  }
 //
-//   func ProcessCustomStruct() (err error) {
-//     defer errflow.IfError().ThenAssignTo(&err)
+//  package main
 //
-//     customStruct := fancypackage.ErrflowCustomStruct(fancypackage.ReadCustomStruct())
+//  func ProcessCustomStruct() (err error) {
+//  	defer errflow.IfError().ThenAssignTo(&err)
 //
-//     // ...
-//   }
+//  	customStructValue := fancypackage.Errf.TryCustomStruct(
+//  		fancypackage.ReadCustomStruct())
+//
+//  	// ...
+//  }
 func (ef *Errflow) ImplementTry(recoverObj interface{}, err error) error {
 	if ef == nil {
 		ef = DefaultErrflow
@@ -113,21 +141,21 @@ func (ef *Errflow) ImplementTry(recoverObj interface{}, err error) error {
 	return err
 }
 
-// Try sends error to Catcher for processing, if there is an error.
+// TryErr sends error to IfError() handler for processing, if there is an error.
 //
-// It is required that 'defer errflow.Catch()' is configured in the same
-// function as Try, otherwise validation will fail when running tests.
+// It is required that 'defer errf.IfError().Then...' is configured in the same
+// function as TryErr, otherwise validation will fail when running tests.
 //
-// Try always returns nil, but type system allows using it to skip
-// return nil statement:
-//   errflow.Try(functionCall())
+// TryErr always returns nil, but type system allows using it to skip return nil statement:
+//   errflow.TryErr(functionCall())
 //   return nil
 // is the same as:
-//   return errflow.Try(functionCall())
+//   return errflow.TryErr(functionCall())
 func (ef *Errflow) TryErr(err error) error {
 	return ef.ImplementTry(recover(), err)
 }
 
+// TryErr is an alias for DefaultErrflow.TryErr(...).
 func TryErr(err error) error {
 	return DefaultErrflow.ImplementTry(recover(), err)
 }
@@ -137,23 +165,23 @@ func TryErr(err error) error {
 //
 // Example:
 //  function ProcessFile() (err error) {
-//    defer errflow.IfError().ThenAssignTo(&err)
+//    defer errf.IfError().ThenAssignTo(&err)
 //
-//    file := errflow.TryAny(os.Create("file.go")).(*os.File)
-//    defer errflow.Try(file.Close())
+//    file := errf.TryAny(os.Create("file.go")).(*os.File)
+//    defer errf.TryErr(file.Close())
 //
 //    // Write to file ...
 //  }
 //
 // Tip: prefer using typed functions, defined in either this library, or
-// custom ones, implemented using errflow.ImplementTry(...).
+// custom ones, implemented using errf.ImplementTry(...).
 //
 // Example above can usually rewritten as:
 //  function ProcessFile() (err error) {
-//    defer errflow.IfError().ThenAssignTo(&err)
+//    defer errf.IfError().ThenAssignTo(&err)
 //
-//    writer := errflow.TryIoWriteCloser(os.Create("file.go"))
-//    defer errflow.Try(writer.Close())
+//    writer := errf.Io.TryWriteCloser(os.Create("file.go"))
+//    defer errf.TryErr(writer.Close())
 //
 //    // Write to file ...
 //  }
@@ -162,28 +190,31 @@ func (ef *Errflow) TryAny(value interface{}, err error) interface{} {
 	return value
 }
 
+// TryAny is an alias for DefaultErrflow.TryAny(...).
 func TryAny(value interface{}, err error) interface{} {
 	DefaultErrflow.ImplementTry(recover(), err)
 	return value
 }
 
-// TryDiscard sends error to Catcher for processing, if there is an error.
-// Non-error value returned from a function is ignored.
+// TryDiscard sends error to IfError() handler for processing, if there is an error.
+// Non-error value returned from a function is discarded.
 //
 // Example:
 //  function writeBuf(w io.Writer, buf []byte) (err error) {
-//    defer errflow.IfError().ThenAssignTo(&err)
+//    defer errf.IfError().ThenAssignTo(&err)
 //
-//    return errflow.TryDiscard(w.Write(buf))
+//    return errf.TryDiscard(w.Write(buf))
 //  }
 func (ef *Errflow) TryDiscard(value interface{}, err error) error {
 	return ef.ImplementTry(recover(), err)
 }
 
+// TryDiscard is an alias for DefaultErrflow.TryDiscard(...).
 func TryDiscard(value interface{}, err error) error {
 	return DefaultErrflow.ImplementTry(recover(), err)
 }
 
+// TryCondition creates and sends error to IfError() handler for processing, if condition is true.
 func (ef *Errflow) TryCondition(condition bool, format string, a ...interface{}) error {
 	if condition {
 		return ef.ImplementTry(recover(), fmt.Errorf(format, a...))
@@ -191,7 +222,7 @@ func (ef *Errflow) TryCondition(condition bool, format string, a ...interface{})
 	return nil
 }
 
-// TryCondition creates and sends error to Catcher for processing, if condition is true.
+// TryCondition is an alias for DefaultErrflow.TryCondition(...).
 func TryCondition(condition bool, format string, a ...interface{}) error {
 	if condition {
 		return DefaultErrflow.ImplementTry(recover(), fmt.Errorf(format, a...))
@@ -199,7 +230,8 @@ func TryCondition(condition bool, format string, a ...interface{}) error {
 	return nil
 }
 
-// Log logs error, if not nil. Doesn't affect control flow.
+// Log logs error, if not nil.
+// Doesn't affect control flow.
 func Log(err error) error {
 	if err != nil {
 		globalLogFn(&LogMessage{

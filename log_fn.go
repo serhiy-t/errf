@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// LogFn defines logger function API for errflow.
 type LogFn func(logMessage *LogMessage)
 
 var globalLogFn = defaulGlobalLogFn(func(s string) {
@@ -40,16 +41,22 @@ func (rlf *logFnRestorer) ThenRestore() {
 	globalLogFn = rlf.oldLogFn
 }
 
+// LogMessage defines a single log message interface.
 type LogMessage struct {
+	// Format is a format string.
 	Format string
-	A      []interface{}
+	// A contains arguments for Format string.
+	A []interface{}
 
+	// Stack function returns stacktrace string.
 	Stack func() string
-	Tags  []string
+
+	// Tags contains additional tags.
+	Tags []string
 }
 
 // SetLogFn replaces logging function for errflow.
-// It returns errflow.DeferRestorer instance,
+// It returns errf.DeferRestorer instance,
 // which can be used to restore previous logFn, if needed.
 // Default log function is log.Println().
 func SetLogFn(logFn LogFn) DeferRestorer {

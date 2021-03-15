@@ -5,22 +5,22 @@ import (
 	"strings"
 )
 
-type ParsedStackItem struct {
-	Fn  string
-	Src string
+type parsedStackItem struct {
+	fn  string
+	src string
 }
 
-type ParsedStack struct {
-	Goroutine string
-	Items     []ParsedStackItem
+type parsedStack struct {
+	goroutine string
+	items     []parsedStackItem
 }
 
-func (ps ParsedStack) String() string {
+func (ps parsedStack) String() string {
 	var lines []string
-	lines = append(lines, ps.Goroutine)
-	for _, item := range ps.Items {
-		lines = append(lines, item.Fn)
-		lines = append(lines, item.Src)
+	lines = append(lines, ps.goroutine)
+	for _, item := range ps.items {
+		lines = append(lines, item.fn)
+		lines = append(lines, item.src)
 	}
 	return strings.Join(lines, "\n")
 }
@@ -32,10 +32,10 @@ func getStringErrorStackTraceFn() func() string {
 	}
 }
 
-func getErrorStackTrace() ParsedStack {
-	var result ParsedStack
+func getErrorStackTrace() parsedStack {
+	var result parsedStack
 	lines := strings.Split(strings.TrimSpace(string(debug.Stack())), "\n")
-	result.Goroutine = lines[0]
+	result.goroutine = lines[0]
 	lines = lines[1:]
 	idx := 0
 	for ; idx < len(lines)-1; idx += 2 {
@@ -57,9 +57,9 @@ func getErrorStackTrace() ParsedStack {
 		idx = 0
 	}
 	for ; idx < len(lines)-1; idx += 2 {
-		result.Items = append(result.Items, ParsedStackItem{
-			Fn:  lines[idx],
-			Src: lines[idx+1],
+		result.items = append(result.items, parsedStackItem{
+			fn:  lines[idx],
+			src: lines[idx+1],
 		})
 	}
 	return result

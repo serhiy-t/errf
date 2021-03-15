@@ -1,6 +1,7 @@
 package errf
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -20,7 +21,7 @@ func maySuppressFirstError(rs returnStrategy) bool {
 	return rs == returnStrategyLast
 }
 
-func getReturnStrategyImpl(rs returnStrategy) func(error, error) (result error, supp1, supp2 bool) {
+func getReturnStrategyImpl(rs returnStrategy) func(error, error) (supp1, supp2 bool, result error) {
 	switch rs {
 	case returnStrategyFirst:
 		return returnStrategyFirstImpl
@@ -46,34 +47,46 @@ func setReturnStrategy(ef *Errflow, rs returnStrategy) *Errflow {
 	return newEf
 }
 
+// ReturnStrategyFirst configures Errflow instance to return first error instance.
+// This is default behavior.
 func ReturnStrategyFirst(ef *Errflow) *Errflow {
 	return setReturnStrategy(ef, returnStrategyFirst)
 }
 
+// ReturnStrategyLast configures Errflow instance to return last error instance.
 func ReturnStrategyLast(ef *Errflow) *Errflow {
 	return setReturnStrategy(ef, returnStrategyLast)
 }
 
+// ReturnStrategyWrapped configures Errflow instance to return all errors.
+// First error will be wrapped using fmt.Errorf with "%w" parameter.
+// For other error, their messages will be included in resulting errors,
+// but the instances will be discraded.
 func ReturnStrategyWrapped(ef *Errflow) *Errflow {
 	return setReturnStrategy(ef, returnStrategyWrapped)
 }
 
+// ReturnStrategyCombined configures Errflow instance to return all errors.
+// All error messages will be collected in resulting message
+// and all error instances will be preserved.
+// Error instances can be retrieved using GetCombinedErrors() function.
 func ReturnStrategyCombined(ef *Errflow) *Errflow {
 	return setReturnStrategy(ef, returnStrategyCombined)
 }
 
-func returnStrategyFirstImpl(err1, err2 error) (result error, supp1, supp2 bool) {
-	return err1, false, true
+func returnStrategyFirstImpl(err1, err2 error) (supp1, supp2 bool, result error) {
+	return false, true, err1
 }
 
-func returnStrategyLastImpl(err1, err2 error) (result error, supp1, supp2 bool) {
-	return err2, true, false
+func returnStrategyLastImpl(err1, err2 error) (supp1, supp2 bool, result error) {
+	return true, false, err2
 }
 
-func returnStrategyWrappedImpl(err1, err2 error) (result error, supp1, supp2 bool) {
-	return fmt.Errorf("%w (also: %s)", err1, err2.Error()), false, false
+func returnStrategyWrappedImpl(err1, err2 error) (supp1, supp2 bool, result error) {
+	return false, false, fmt.Errorf("%w (also: %s)", err1, err2.Error())
 }
 
+// CombinedError implements an error that holds multiple errors.
 type CombinedError struct {
 	errs []error
 }
@@ -86,30 +99,35 @@ func (cerr CombinedError) Error() string {
 	return fmt.Sprintf("combined error {%s}", strings.Join(errors, "; "))
 }
 
+// GetCombinedErrors returns all error instances from CombinedError error,
+// even if the error was wrapped using fmt.Errorf with "%w" parameter.
+// Note that resulting errors are all flattened out into a single list,
+// meaning that calling GetCombinedErrors on errors returned from GetCombinedErrors
+// will always result in returning the same error.
 func GetCombinedErrors(err error) []error {
 	if err == nil {
 		return nil
 	}
-	cerr, ok := err.(CombinedError)
-	if ok {
+	var cerr CombinedError
+	if errors.As(err, &cerr) {
 		return cerr.errs
 	}
 	return []error{err}
 }
 
-func returnStrategyCombinedImpl(err1, err2 error) (result error, supp1, supp2 bool) {
+func returnStrategyCombinedImpl(err1, err2 error) (supp1, supp2 bool, result error) {
 	var errs []error
 
 	errs = append(errs, GetCombinedErrors(err1)...)
 	errs = append(errs, GetCombinedErrors(err2)...)
 
 	if len(errs) == 0 {
-		return nil, false, false
+		return false, false, nil
 	} else if len(errs) == 1 {
-		return errs[0], false, false
+		return false, false, errs[0]
 	} else {
-		return CombinedError{
+		return false, false, CombinedError{
 			errs: errs,
-		}, false, false
+		}
 	}
 }
