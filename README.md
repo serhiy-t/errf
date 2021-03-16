@@ -1,6 +1,19 @@
 # ErrorFlow
 Declarative error handling for Go.
 
+## Motivation
+
+See articles:
+* [Error Handling — Problem Overview](https://go.googlesource.com/proposal/+/master/design/go2draft-error-handling-overview.md)
+* [Don't defer Close() on writable files
+](https://www.joeshaw.org/dont-defer-close-on-writable-files/)
+
+ErrorFlow goal is to provide a library solution to the issues above.
+
+Library solution (as opposed to a language change), although less cleaner, has a very important benefit: it is optional.
+Many language changes proposals for addressing this issue have been rejected because language change is required to be universally applicable.
+Library solution can be used only for use cases where it works well.
+
 ## Features
 
 * 'err'-variable-free type-safe branchless business logic
@@ -42,14 +55,10 @@ defer func() {
 }()
 ```
 * Doesn't affect APIs
-  * Every ErrorFlow application is scoped to a single function and doesn't leak into its API
+  * Every use of ErrorFlow is scoped to a single function and doesn't leak into its API
 * Extendable
   * Custom return types for type safety
   * Custom ErrorFlow config functions (e.g. creating a wrapper that converts errors from a third-party libraries into standard error types for internal codebase)
-
-## Motivation
-
-Gravity of the issue.
 
 ## Example: error handling for file gzip function
 
