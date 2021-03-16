@@ -1,7 +1,7 @@
 package examples
 
 import (
-	"bufio"
+	"compress/gzip"
 	"fmt"
 	"io"
 	"log"
@@ -10,10 +10,15 @@ import (
 	"github.com/serhiy-t/errf"
 )
 
-// CopyFileErrflow copies file srcFilename into dstFilename.
-func CopyFileErrflow(dstFilename string, srcFilename string) (err error) {
+// GzipFileErrflow compresses file srcFilename into dstFilename.
+func GzipFileErrflow(dstFilename string, srcFilename string) (err error) {
+	// defer IfError()... creates and configures
+	// ErrorFlow error handler for this function.
+	// When any of Check* functions encounters non-nil error
+	// it immediately sends error to this handler
+	// unwinding all stacked defers.
 	defer errf.IfError().LogIfSuppressed().Apply(
-		errf.WrapperFmtErrorw("error copying file"),
+		errf.WrapperFmtErrorw("error compressing file"),
 	).ThenAssignTo(&err)
 
 	errf.CheckCondition(len(dstFilename) == 0, "dst file should be specified")
@@ -29,26 +34,26 @@ func CopyFileErrflow(dstFilename string, srcFilename string) (err error) {
 	defer errf.CheckErr(
 		writer.Close())
 
-	bufWriter := bufio.NewWriter(writer)
+	gzipWriter := gzip.NewWriter(writer)
 	defer errf.CheckErr(
-		bufWriter.Flush())
+		gzipWriter.Close())
 
 	return errf.CheckDiscard(
-		io.Copy(bufWriter, bufio.NewReader(reader)))
+		io.Copy(gzipWriter, reader))
 }
 
-// CopyFilePlainGo copies file srcFilename into dstFilename.
-func CopyFilePlainGo(dstFilename string, srcFilename string) (err error) {
+// GzipFilePlainGo compresses file srcFilename into dstFilename.
+func GzipFilePlainGo(dstFilename string, srcFilename string) (err error) {
 	if len(dstFilename) == 0 {
-		return fmt.Errorf("error copying file: dst file should be specified")
+		return fmt.Errorf("error compressing file: dst file should be specified")
 	}
 	if len(srcFilename) == 0 {
-		return fmt.Errorf("error copying file: src file should be specified")
+		return fmt.Errorf("error compressing file: src file should be specified")
 	}
 
 	reader, err := os.Open(srcFilename)
 	if err != nil {
-		return fmt.Errorf("error copying file: %w", err)
+		return fmt.Errorf("error compressing file: %w", err)
 	}
 	defer func() {
 		closeErr := reader.Close()
@@ -59,74 +64,74 @@ func CopyFilePlainGo(dstFilename string, srcFilename string) (err error) {
 
 	writer, err := os.Create(dstFilename)
 	if err != nil {
-		return fmt.Errorf("error copying file: %w", err)
+		return fmt.Errorf("error compressing file: %w", err)
 	}
 	defer func() {
 		closeErr := writer.Close()
 		if closeErr != nil {
 			if err == nil {
-				err = fmt.Errorf("error copying file: %w", closeErr)
+				err = fmt.Errorf("error compressing file: %w", closeErr)
 			} else {
-				log.Println(fmt.Errorf("[suppressed] error copying file: %w", closeErr))
+				log.Println(fmt.Errorf("[suppressed] error compressing file: %w", closeErr))
 			}
 		}
 	}()
 
-	bufWriter := bufio.NewWriter(writer)
+	gzipWriter := gzip.NewWriter(writer)
 	defer func() {
-		closeErr := bufWriter.Flush()
+		closeErr := gzipWriter.Close()
 		if closeErr != nil {
 			if err == nil {
-				err = fmt.Errorf("error copying file: %w", closeErr)
+				err = fmt.Errorf("error compressing file: %w", closeErr)
 			} else {
-				log.Println(fmt.Errorf("[suppressed] error copying file: %w", closeErr))
+				log.Println(fmt.Errorf("[suppressed] error compressing file: %w", closeErr))
 			}
 		}
 	}()
 
-	_, err = io.Copy(bufWriter, bufio.NewReader(reader))
+	_, err = io.Copy(gzipWriter, reader)
 	if err != nil {
-		return fmt.Errorf("error copying file: %w", err)
+		return fmt.Errorf("error compressing file: %w", err)
 	}
 
 	return nil
 }
 
-// CopyFileErrflowNoPanics copies file srcFilename into dstFilename.
-func CopyFileErrflowNoPanics(dstFilename string, srcFilename string) (err error) {
+// GzipFileErrflowLite compresses file srcFilename into dstFilename.
+func GzipFileErrflowLite(dstFilename string, srcFilename string) (err error) {
 	errflow := errf.With(
 		errf.LogStrategyIfSuppressed,
-		errf.WrapperFmtErrorw("error copying file"),
+		errf.WrapperFmtErrorw("error compressing file"),
 	)
 
 	if len(dstFilename) == 0 {
-		return fmt.Errorf("error copying file: dst file should be specified")
+		return fmt.Errorf("error compressing file: dst file should be specified")
 	}
 	if len(srcFilename) == 0 {
-		return fmt.Errorf("error copying file: src file should be specified")
+		return fmt.Errorf("error compressing file: src file should be specified")
 	}
 
 	reader, err := os.Open(srcFilename)
 	if err != nil {
-		return fmt.Errorf("error copying file: %w", err)
+		return fmt.Errorf("error compressing file: %w", err)
 	}
 	defer errflow.Log(
 		reader.Close())
 
 	writer, err := os.Create(dstFilename)
 	if err != nil {
-		return fmt.Errorf("error copying file: %w", err)
+		return fmt.Errorf("error compressing file: %w", err)
 	}
 	defer errflow.IfErrorAssignTo(&err,
 		writer.Close())
 
-	bufWriter := bufio.NewWriter(writer)
+	gzipWriter := gzip.NewWriter(writer)
 	defer errflow.IfErrorAssignTo(&err,
-		bufWriter.Flush())
+		gzipWriter.Close())
 
-	_, err = io.Copy(bufWriter, bufio.NewReader(reader))
+	_, err = io.Copy(gzipWriter, reader)
 	if err != nil {
-		return fmt.Errorf("error copying file: %w", err)
+		return fmt.Errorf("error compressing file: %w", err)
 	}
 
 	return nil

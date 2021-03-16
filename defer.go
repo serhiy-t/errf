@@ -9,6 +9,9 @@ import (
 // It is possible to use most of errf.With(...) configs.
 // Unsupported configs (e.g. ReturnStrategyLast) will panic when used.
 //
+// Note: don't mix IfErrorAssignTo with 'defer errf.IfError()...' and Check* functions
+// in the same function. They are not designed to work together.
+//
 // Example:
 //  func example() (err error) {
 //  	writer, err := openWriter(...)
