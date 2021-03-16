@@ -24,8 +24,31 @@ type IfErrorHandler struct {
 }
 
 // ThenAssignTo assigns resulting error to outErr (only if non-nil).
+// If outErr is already non-nil, it will be replaced by error returned
+// from IfErrorHandler, and logged if log strategy is IfSuppressed or Always.
+// Note: it is not recommended to mix returning errors directly and via Check* function
+//       because IfError handler doesn't have much control over direct errors,
+//       which might result in unexpected behavior.
+// To avoid mixing, always instead of:
+//   return err
+// write
+//   return errf.CheckErr(err)
 func (c *IfErrorHandler) ThenAssignTo(outErr *error) {
-	c.catch(recover(), func(err error) { *outErr = err })
+	c.catch(recover(), func(err error) {
+		if *outErr != nil {
+			ef := With(c.options...)
+			ef.applyDeferredOptions()
+			if ef.logStrategy == logStrategyAlways || ef.logStrategy == logStrategyIfSuppressed {
+				globalLogFn(&LogMessage{
+					Format: "%s",
+					A:      []interface{}{(*outErr).Error()},
+					Stack:  getStringErrorStackTraceFn(),
+					Tags:   []string{"errorflow", "suppressed-external-error"},
+				})
+			}
+		}
+		*outErr = err
+	})
 }
 
 // Then calls a callback for resulting error (only if non-nil).
@@ -122,7 +145,7 @@ func (c *IfErrorHandler) catch(recoverObj interface{}, fn func(err error)) {
 						Format: "%s",
 						A:      []interface{}{item.err.Error()},
 						Stack:  getStringErrorStackTraceFn(),
-						Tags:   []string{"errflow", "error"},
+						Tags:   []string{"errorflow", "error"},
 					})
 				}
 
@@ -134,7 +157,7 @@ func (c *IfErrorHandler) catch(recoverObj interface{}, fn func(err error)) {
 							Format: "%s",
 							A:      []interface{}{currItem.err.Error()},
 							Stack:  getStringErrorStackTraceFn(),
-							Tags:   []string{"errflow", "suppressed-error"},
+							Tags:   []string{"errorflow", "suppressed-error"},
 						})
 					}
 					if supp2 && item.ef.logStrategy == logStrategyIfSuppressed {
@@ -142,7 +165,7 @@ func (c *IfErrorHandler) catch(recoverObj interface{}, fn func(err error)) {
 							Format: "%s",
 							A:      []interface{}{item.err.Error()},
 							Stack:  getStringErrorStackTraceFn(),
-							Tags:   []string{"errflow", "suppressed-error"},
+							Tags:   []string{"errorflow", "suppressed-error"},
 						})
 					}
 

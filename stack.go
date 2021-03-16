@@ -26,15 +26,15 @@ func (ps parsedStack) String() string {
 }
 
 func getStringErrorStackTraceFn() func() string {
-	result := getErrorStackTrace()
+	debugStack := debug.Stack()
 	return func() string {
-		return result.String()
+		return parseErrorStackTrace(string(debugStack)).String()
 	}
 }
 
-func getErrorStackTrace() parsedStack {
+func parseErrorStackTrace(debugStack string) parsedStack {
 	var result parsedStack
-	lines := strings.Split(strings.TrimSpace(string(debug.Stack())), "\n")
+	lines := strings.Split(strings.TrimSpace(debugStack), "\n")
 	result.goroutine = lines[0]
 	lines = lines[1:]
 	idx := 0
@@ -63,4 +63,8 @@ func getErrorStackTrace() parsedStack {
 		})
 	}
 	return result
+}
+
+func getErrorStackTrace() parsedStack {
+	return parseErrorStackTrace(string(debug.Stack()))
 }

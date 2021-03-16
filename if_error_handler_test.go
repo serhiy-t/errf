@@ -158,3 +158,19 @@ func TestCatcher_UnrelatedPanic(t *testing.T) {
 		fn()
 	})
 }
+
+func TestCatcher_ThenAssignTo_ExternalError(t *testing.T) {
+	var logs []string
+	defer SetLogFn(func(m *LogMessage) {
+		logs = append(logs, fmt.Sprintf(m.Format, m.A...))
+	}).ThenRestore()
+
+	fn := func() (err error) {
+		defer IfError().LogIfSuppressed().ThenAssignTo(&err)
+		defer CheckErr(fmt.Errorf("second"))
+		return fmt.Errorf("first")
+	}
+
+	assert.EqualError(t, fn(), "second")
+	assert.Equal(t, []string{"first"}, logs)
+}

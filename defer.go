@@ -38,7 +38,7 @@ func (ef *Errflow) IfErrorAssignTo(outErr *error, err error) {
 					Format: "%s",
 					A:      []interface{}{err.Error()},
 					Stack:  getStringErrorStackTraceFn(),
-					Tags:   []string{"errflow", "error"},
+					Tags:   []string{"errorflow", "error"},
 				})
 			}
 		} else {
@@ -49,7 +49,7 @@ func (ef *Errflow) IfErrorAssignTo(outErr *error, err error) {
 					Format: "%s",
 					A:      []interface{}{err.Error()},
 					Stack:  getStringErrorStackTraceFn(),
-					Tags:   []string{"errflow", "suppressed-error"},
+					Tags:   []string{"errorflow", "suppressed-error"},
 				})
 			}
 		}

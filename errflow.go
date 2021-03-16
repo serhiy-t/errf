@@ -258,7 +258,7 @@ func Log(err error) error {
 			Format: "%s",
 			A:      []interface{}{err.Error()},
 			Stack:  getStringErrorStackTraceFn(),
-			Tags:   []string{"errflow", "error"},
+			Tags:   []string{"errorflow", "error"},
 		})
 	}
 	return err
