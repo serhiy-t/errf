@@ -26,9 +26,11 @@ type IfErrorHandler struct {
 // ThenAssignTo assigns resulting error to outErr (only if non-nil).
 // If outErr is already non-nil, it will be replaced by error returned
 // from IfErrorHandler, and logged if log strategy is IfSuppressed or Always.
+//
 // Note: it is not recommended to mix returning errors directly and via Check* function
-//       because IfError handler doesn't have much control over direct errors,
-//       which might result in unexpected behavior.
+// because IfError handler doesn't have much control over direct errors,
+// which might result in counterintuitive behavior.
+//
 // To avoid mixing, always instead of:
 //   return err
 // write

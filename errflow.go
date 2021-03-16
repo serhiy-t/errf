@@ -175,7 +175,7 @@ func CheckErr(err error) error {
 	return DefaultErrflow.ImplementCheck(recover(), err)
 }
 
-// CheckAny sends error to Catcher for processing, if there is an error.
+// CheckAny sends error to IfError() handler for processing, if there is an error.
 // If there is no error, it returns value as a generic interface{}.
 //
 // Example:
@@ -245,15 +245,15 @@ func CheckCondition(condition bool, format string, a ...interface{}) error {
 	return nil
 }
 
-// Log is an alias for errf.Log(...) function.
-func (ef *Errflow) Log(err error) error {
-	return Log(err)
-}
-
 // Log logs error, if not nil.
+// Always logs, even if log strategy is LogStrategyNever.
 // Doesn't affect control flow.
-func Log(err error) error {
+func (ef *Errflow) Log(err error) error {
 	if err != nil {
+		ef.applyDeferredOptions()
+		if ef.wrapper != nil {
+			err = ef.wrapper(err)
+		}
 		globalLogFn(&LogMessage{
 			Format: "%s",
 			A:      []interface{}{err.Error()},
@@ -262,4 +262,9 @@ func Log(err error) error {
 		})
 	}
 	return err
+}
+
+// Log is an alias for DefaultErrflow.Log(...).
+func Log(err error) error {
+	return DefaultErrflow.Log(err)
 }

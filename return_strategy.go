@@ -101,6 +101,7 @@ func (cerr CombinedError) Error() string {
 
 // GetCombinedErrors returns all error instances from CombinedError error,
 // even if the error was wrapped using fmt.Errorf with "%w" parameter.
+//
 // Note that resulting errors are all flattened out into a single list,
 // meaning that calling GetCombinedErrors on errors returned from GetCombinedErrors
 // will always result in returning the same error.

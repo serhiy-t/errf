@@ -56,7 +56,7 @@ func fmtErrorf(format string, a ...interface{}) func(err error) error {
 // Example:
 //  func exampleUsage() (err error) {
 //  	defer errf.IfError().Apply(
-//  		errf.WrapperFmtErrorf("--> %w <--", errf.OriginalErr)
+//  		errf.WrapperFmtErrorf("%s %w %s", "-->", errf.OriginalErr, "<--")
 //  	).ThenAssignTo(&err)
 //
 //  	// ...
@@ -66,8 +66,6 @@ func WrapperFmtErrorf(format string, a ...interface{}) ErrflowOption {
 }
 
 // WrapperFmtErrorw is a Wrapper that uses fmt.Errorf("%s: %w", ...) to wrap errors.
-//
-// See WrapperFmtErrorw for common scenario fmt.Errorf("wrap message: %w", err).
 //
 // Example:
 //  func exampleUsage() (err error) {

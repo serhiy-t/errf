@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCatcher_ThenAssignTo(t *testing.T) {
+func TestIfErrorHandler_ThenAssignTo(t *testing.T) {
 	fn := func(returnErr error) (err error) {
 		defer IfError().ThenAssignTo(&err)
 		return CheckErr(returnErr)
@@ -18,7 +18,7 @@ func TestCatcher_ThenAssignTo(t *testing.T) {
 	assert.EqualError(t, fn(fmt.Errorf("test error")), "test error")
 }
 
-func TestCatcher_Then(t *testing.T) {
+func TestIfErrorHandler_Then(t *testing.T) {
 	var outErr error
 	fn := func(returnErr error) {
 		defer IfError().Then(func(err error) { outErr = err })
@@ -31,7 +31,7 @@ func TestCatcher_Then(t *testing.T) {
 	assert.EqualError(t, outErr, "test error")
 }
 
-func TestCatcher_ThenIgnore(t *testing.T) {
+func TestIfErrorHandler_ThenIgnore(t *testing.T) {
 	fn := func(returnErr error) (err error) {
 		defer IfError().ThenIgnore()
 		return CheckErr(returnErr)
@@ -41,7 +41,7 @@ func TestCatcher_ThenIgnore(t *testing.T) {
 	assert.Nil(t, fn(fmt.Errorf("test error")))
 }
 
-func TestCatcher_ReturnFirst(t *testing.T) {
+func TestIfErrorHandler_ReturnFirst(t *testing.T) {
 	fn := func() (err error) {
 		defer IfError().ReturnFirst().ThenAssignTo(&err)
 		defer CheckErr(fmt.Errorf("second"))
@@ -52,7 +52,7 @@ func TestCatcher_ReturnFirst(t *testing.T) {
 	assert.EqualError(t, fn(), "first")
 }
 
-func TestCatcher_ReturnLast(t *testing.T) {
+func TestIfErrorHandler_ReturnLast(t *testing.T) {
 	fn := func() (err error) {
 		defer IfError().ReturnLast().ThenAssignTo(&err)
 		defer CheckErr(fmt.Errorf("second"))
@@ -63,7 +63,7 @@ func TestCatcher_ReturnLast(t *testing.T) {
 	assert.EqualError(t, fn(), "second")
 }
 
-func TestCatcher_ReturnWrapped(t *testing.T) {
+func TestIfErrorHandler_ReturnWrapped(t *testing.T) {
 	fn := func() (err error) {
 		defer IfError().ReturnWrapped().ThenAssignTo(&err)
 		defer CheckErr(fmt.Errorf("second"))
@@ -76,7 +76,7 @@ func TestCatcher_ReturnWrapped(t *testing.T) {
 	assert.EqualError(t, errors.Unwrap(err), "first")
 }
 
-func TestCatcher_ReturnCombined(t *testing.T) {
+func TestIfErrorHandler_ReturnCombined(t *testing.T) {
 	fn := func() (err error) {
 		defer IfError().ReturnCombined().ThenAssignTo(&err)
 		defer CheckErr(fmt.Errorf("second"))
@@ -92,7 +92,7 @@ func TestCatcher_ReturnCombined(t *testing.T) {
 	assert.EqualError(t, errs[1], "second")
 }
 
-func TestCatcher_LogNever(t *testing.T) {
+func TestIfErrorHandler_LogNever(t *testing.T) {
 	var logs []string
 	defer SetLogFn(func(m *LogMessage) {
 		logs = append(logs, fmt.Sprintf(m.Format, m.A...))
@@ -109,7 +109,7 @@ func TestCatcher_LogNever(t *testing.T) {
 	assert.Empty(t, logs)
 }
 
-func TestCatcher_LogAlways(t *testing.T) {
+func TestIfErrorHandler_LogAlways(t *testing.T) {
 	var logs []string
 	defer SetLogFn(func(m *LogMessage) {
 		logs = append(logs, fmt.Sprintf(m.Format, m.A...))
@@ -126,7 +126,7 @@ func TestCatcher_LogAlways(t *testing.T) {
 	assert.Equal(t, []string{"first", "second"}, logs)
 }
 
-func TestCatcher_LogIfSuppressed(t *testing.T) {
+func TestIfErrorHandler_LogIfSuppressed(t *testing.T) {
 	var logs []string
 	defer SetLogFn(func(m *LogMessage) {
 		logs = append(logs, fmt.Sprintf(m.Format, m.A...))
@@ -147,7 +147,7 @@ func unrelatedPanicFn() {
 	panic(fmt.Errorf("unrelated panic"))
 }
 
-func TestCatcher_UnrelatedPanic(t *testing.T) {
+func TestIfErrorHandler_UnrelatedPanic(t *testing.T) {
 	fn := func() (err error) {
 		defer IfError().ThenAssignTo(&err)
 		unrelatedPanicFn()
@@ -159,7 +159,7 @@ func TestCatcher_UnrelatedPanic(t *testing.T) {
 	})
 }
 
-func TestCatcher_ThenAssignTo_ExternalError(t *testing.T) {
+func TestIfErrorHandler_ThenAssignTo_ExternalError(t *testing.T) {
 	var logs []string
 	defer SetLogFn(func(m *LogMessage) {
 		logs = append(logs, fmt.Sprintf(m.Format, m.A...))
