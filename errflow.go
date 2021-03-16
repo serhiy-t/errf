@@ -124,8 +124,8 @@ type errflowThrow struct {
 //  func ProcessCustomStruct() (err error) {
 //  	defer errflow.IfError().ThenAssignTo(&err)
 //
-//  	customStructValue := fancypackage.Errf.CheckCustomStruct(
-//  		fancypackage.ReadCustomStruct())
+//  	customStructValue := fancypackage.Errf.CheckCustomType1(
+//  		fancypackage.ReadCustomType1())
 //
 //  	// ...
 //  }

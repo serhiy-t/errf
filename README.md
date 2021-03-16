@@ -11,7 +11,7 @@ See articles:
 ErrorFlow goal is to provide a library solution to the issues above.
 
 Library solution (as opposed to a language change), although less cleaner, has a very important benefit: it is optional.
-Many language changes proposals for addressing this issue have been rejected because language change is required to be universally applicable.
+Many language proposals for addressing this issue have been rejected because language change is required to be universally applicable.
 Library solution can be used only for use cases where it works well.
 
 ## Features
