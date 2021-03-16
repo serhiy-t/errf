@@ -47,7 +47,7 @@ defer func() {
 
 Gravity of the issue.
 
-## Example (error handling for file gzip function)
+## Example: error handling for file gzip function
 
 Error handling requirements for function:
 * Returns error only in case of error that
