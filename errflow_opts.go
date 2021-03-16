@@ -1,6 +1,6 @@
 package errf
 
-// Opts combines mulitple options into a single.
+// Opts combines multiple options into a single.
 func Opts(options ...ErrflowOption) ErrflowOption {
 	return func(ef *Errflow) *Errflow {
 		for _, opt := range options {

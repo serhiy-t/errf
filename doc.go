@@ -1,4 +1,4 @@
-// ErrorFlow provides declarative error hanlding for Go
+// Package errf provides declarative error hanlding for Go
 //
 // Basic usage
 //
