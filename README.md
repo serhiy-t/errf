@@ -75,22 +75,16 @@ func GzipFile(dstFilename string, srcFilename string) (err error) {
 	errf.CheckCondition(len(dstFilename) == 0, "dst file should be specified")
 	errf.CheckCondition(len(srcFilename) == 0, "src file should be specified")
 
-	reader := errf.Io.CheckReadCloser(
-		os.Open(srcFilename))
-	defer errf.With(errWrapper).Log(
-		reader.Close())
+	reader := errf.Io.CheckReadCloser(os.Open(srcFilename))
+	defer errf.With(errWrapper).Log(reader.Close())
 
-	writer := errf.Io.CheckWriteCloser(
-		os.Create(dstFilename))
-	defer errf.CheckErr(
-		writer.Close())
+	writer := errf.Io.CheckWriteCloser(os.Create(dstFilename))
+	defer errf.CheckErr(writer.Close())
 
 	gzipWriter := gzip.NewWriter(writer)
-	defer errf.CheckErr(
-		gzipWriter.Close())
+	defer errf.CheckErr(gzipWriter.Close())
 
-	return errf.CheckDiscard(
-		io.Copy(gzipWriter, reader))
+	return errf.CheckDiscard(io.Copy(gzipWriter, reader))
 }
 ```
 
@@ -198,19 +192,16 @@ func GzipFile(dstFilename string, srcFilename string) (err error) {
 	if err != nil {
 		return fmt.Errorf("error compressing file: %w", err)
 	}
-	defer errflow.Log(
-		reader.Close())
+	defer errflow.Log(reader.Close())
 
 	writer, err := os.Create(dstFilename)
 	if err != nil {
 		return fmt.Errorf("error compressing file: %w", err)
 	}
-	defer errflow.IfErrorAssignTo(&err,
-		writer.Close())
+	defer errflow.IfErrorAssignTo(&err, writer.Close())
 
 	gzipWriter := gzip.NewWriter(writer)
-	defer errflow.IfErrorAssignTo(&err,
-		gzipWriter.Close())
+	defer errflow.IfErrorAssignTo(&err, gzipWriter.Close())
 
 	_, err = io.Copy(gzipWriter, reader)
 	if err != nil {
