@@ -79,7 +79,7 @@ func GzipFile(dstFilename string, srcFilename string) (err error) {
 	// it immediately sends error to this handler
 	// unwinding all stacked defers.
 	errWrapper := errf.WrapperFmtErrorw("error compressing file")
-	defer errf.IfError().LogIfSuppressed().Apply(errWrapper).ThenAssignTo(&err)
+	defer errf.IfError().ReturnFirst().LogIfSuppressed().Apply(errWrapper).ThenAssignTo(&err)
 
 	errf.CheckCondition(len(dstFilename) == 0, "dst file should be specified")
 	errf.CheckCondition(len(srcFilename) == 0, "src file should be specified")
