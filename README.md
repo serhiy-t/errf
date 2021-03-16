@@ -71,7 +71,7 @@ Error handling requirements for function:
 * Returns error only in case of error that
 affects result file correctness.
 * Logs all internal errors that it didn't return.
-* Wraps returned errors with "errors compression file: " prefix.
+* Wraps returned errors with "error compressing file: " prefix.
 * Performs input parameters validation.
 
 ### ErrorFlow style error handling
