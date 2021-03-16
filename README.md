@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/serhiy-t/errf.svg?branch=master)](https://travis-ci.com/serhiy-t/errf)
+
 # ErrorFlow
 Declarative error handling for Go.
 
