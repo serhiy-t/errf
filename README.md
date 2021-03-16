@@ -25,7 +25,7 @@ defer func() {
 	}
 }()
 ```
-* Declarative errors logging
+* Declarative errors logging logic
 ```go
 defer errf.IfError().LogIfSuppressed().ThenAssignTo(&err)
 defer errf.CheckErr(writer.Close())

@@ -17,16 +17,15 @@ func GzipFileErrflow(dstFilename string, srcFilename string) (err error) {
 	// When any of Check* functions encounters non-nil error
 	// it immediately sends error to this handler
 	// unwinding all stacked defers.
-	defer errf.IfError().LogIfSuppressed().Apply(
-		errf.WrapperFmtErrorw("error compressing file"),
-	).ThenAssignTo(&err)
+	errWrapper := errf.WrapperFmtErrorw("error compressing file")
+	defer errf.IfError().LogIfSuppressed().Apply(errWrapper).ThenAssignTo(&err)
 
 	errf.CheckCondition(len(dstFilename) == 0, "dst file should be specified")
 	errf.CheckCondition(len(srcFilename) == 0, "src file should be specified")
 
 	reader := errf.Io.CheckReadCloser(
 		os.Open(srcFilename))
-	defer errf.Log(
+	defer errf.With(errWrapper).Log(
 		reader.Close())
 
 	writer := errf.Io.CheckWriteCloser(

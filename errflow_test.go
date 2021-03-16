@@ -158,12 +158,12 @@ func TestErrflow_IfError_Apply(t *testing.T) {
 func TestErrflow_Opts(t *testing.T) {
 	errflow := With(LogStrategyAlways)
 
-	errflow1 := With(errflow.Opts()...)
+	errflow1 := With(OptsFrom(errflow))
 	errflow1.applyDeferredOptions()
 
 	errflow.applyDeferredOptions()
 	errflow = errflow.With(ReturnStrategyWrapped)
-	errflow2 := With(errflow.Opts()...)
+	errflow2 := With(OptsFrom(errflow))
 	errflow2.applyDeferredOptions()
 
 	assert.Equal(t, errflow1.logStrategy, logStrategyAlways)
