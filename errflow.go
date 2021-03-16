@@ -106,16 +106,16 @@ type errflowThrow struct {
 //  }
 //
 //  func (ef FancyPackageErrflow) With(options ...ErrflowOption) FancyPackageErrflow {
-//  	return FancyPackageErrflow{errflow: errf.errflow.With(options...)}
+//  	return FancyPackageErrflow{errflow: ef.errflow.With(options...)}
 //  }
 //
 //  func (ef FancyPackageErrflow) CheckCustomType1(value *CustomType1, err error) *CustomType1 {
-//  	errf.errflow.ImplementCheck(recover(), err)
+//  	ef.errflow.ImplementCheck(recover(), err)
 //  	return value
 //  }
 //
 //  func (ef FancyPackageErrflow) CheckCustomType2(value *CustomType2, err error) *CustomType2 {
-//  	errf.errflow.ImplementCheck(recover(), err)
+//  	ef.errflow.ImplementCheck(recover(), err)
 //  	return value
 //  }
 //
