@@ -13,7 +13,7 @@ if err != nil {
 }
 ```
 
-* Flexible declarative multiple-errors handling logic
+* Declarative multiple errors handling logic
 ```go
 defer errf.IfError().ReturnFirst().ThenAssignTo(&err)
 defer errf.CheckErr(writer.Close())
@@ -25,7 +25,7 @@ defer func() {
 	}
 }()
 ```
-* Flexible declarative error logging
+* Declarative errors logging
 ```go
 defer errf.IfError().LogIfSuppressed().ThenAssignTo(&err)
 defer errf.CheckErr(writer.Close())
@@ -42,6 +42,10 @@ defer func() {
 }()
 ```
 * Doesn't affect APIs
+  * Every ErrorFlow application is scoped to a single function and doesn't leak into its API
+* Extendable
+  * Custom return types for type safety
+  * Custom ErrorFlow config functions (e.g. creating a wrapper that converts errors from a third-party libraries into standard error types for internal codebase)
 
 ## Motivation
 
@@ -94,7 +98,7 @@ func GzipFile(dstFilename string, srcFilename string) (err error) {
 ### Compare with
 
 <details>
-	<summary>Plain Go implementation, without any error handling</summary>
+	<summary>Plain Go implementation without any error handling</summary>
 
 ```go
 func GzipFile(dstFilename string, srcFilename string) error {
@@ -115,7 +119,7 @@ func GzipFile(dstFilename string, srcFilename string) error {
 </details>
 
 <details>
-	<summary>Plain Go implementation, functionally roughly equivalent to ErrorFlow example above, not using helper functions</summary>
+	<summary>Plain Go implementation (functionally roughly equivalent to ErrorFlow example above; not using helper functions)</summary>
 
 ```go
 func GzipFile(dstFilename string, srcFilename string) (err error) {
