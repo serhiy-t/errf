@@ -74,12 +74,12 @@ func TestErrflow_Log(t *testing.T) {
 
 	fn := func() (err error) {
 		defer IfError().LogNever().ThenAssignTo(&err)
-		defer Log(fmt.Errorf("error message"))
+		defer With(WrapperFmtErrorw("wrapped")).Log(fmt.Errorf("error message"))
 		return nil
 	}
 
 	assert.NoError(t, fn())
-	assert.Equal(t, []string{"error message"}, logs)
+	assert.Equal(t, []string{"wrapped: error message"}, logs)
 }
 
 func TestErrflow_ErrorIf(t *testing.T) {
