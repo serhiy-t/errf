@@ -4,6 +4,7 @@ package errf
 var Std = StdErrflow{}
 
 // StdErrflow implements Check* functions for built-in types.
+//
 // Clients should not instantiate StdErrflow, use 'errf.Std' instead.
 type StdErrflow struct {
 	errflow *Errflow

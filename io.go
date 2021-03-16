@@ -6,6 +6,7 @@ import "io"
 var Io = IoErrflow{}
 
 // IoErrflow implements Check* functions for io package types.
+//
 // Clients should not instantiate IoErrflow, use 'errf.Io' instead.
 type IoErrflow struct {
 	errflow *Errflow

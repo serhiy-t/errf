@@ -8,6 +8,7 @@ import (
 var Bufio = BufioErrflow{}
 
 // BufioErrflow implements Check* functions for bufio package types.
+//
 // Clients should not instantiate BufioErrflow, use 'errf.Bufio' instead.
 type BufioErrflow struct {
 	errflow *Errflow

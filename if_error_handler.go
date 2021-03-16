@@ -1,9 +1,10 @@
 package errf
 
 // IfError creates IfErrorHandler.
+//
 // Should always:
 //   * be used only in defer statements;
-//   * be a first method call in a function;
+//   * be in the beginning of a function;
 //   * terminated by one of Then*(...) functions.
 //
 // Example:
@@ -18,6 +19,7 @@ func IfError() *IfErrorHandler {
 }
 
 // IfErrorHandler configures errorflow error handling behavior in a scope of a function.
+//
 // Should be created only via IfError() method.
 type IfErrorHandler struct {
 	options []ErrflowOption
@@ -109,6 +111,7 @@ func (c *IfErrorHandler) LogNever() *IfErrorHandler {
 //  }
 //
 // When example() is called, "wrapper 1" will be applied first and "wrapper 2" will be applied second.
+//
 // Resulting error message is: "wrapper 2: wrapper 1: error 1".
 func (c *IfErrorHandler) Apply(options ...ErrflowOption) *IfErrorHandler {
 	c.options = append(c.options, options...)

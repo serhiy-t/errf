@@ -4,6 +4,7 @@ import "fmt"
 
 // Wrapper function creates ErrflowOption that wraps original errors
 // using provided 'func(err error) error' function.
+//
 // See WrapperFmtErrorw for common scenario fmt.Errorf("wrap message: %w", err).
 //
 // Example:
