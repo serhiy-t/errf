@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.com/serhiy-t/errf.svg?branch=master)](https://travis-ci.com/serhiy-t/errf)
 [![Go Report Card](https://goreportcard.com/badge/github.com/serhiy-t/errf)](https://goreportcard.com/report/github.com/serhiy-t/errf)
+[![Documentation](https://godoc.org/github.com/serhiy-t/errf?status.svg)](http://godoc.org/github.com/serhiy-t/errf)
+
 
 # ErrorFlow
 Declarative error handling for Go.
