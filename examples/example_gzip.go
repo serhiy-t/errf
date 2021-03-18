@@ -27,6 +27,7 @@ func GzipFileErrflow(dstFilename string, srcFilename string) (err error) {
 	defer errf.With(errWrapper).Log(reader.Close())
 
 	writer := errf.Io.CheckWriteCloser(os.Create(dstFilename))
+	defer errf.Handle().OnAnyErrOrPanic(func() { os.Remove(dstFilename) })
 	defer errf.CheckErr(writer.Close())
 
 	gzipWriter := gzip.NewWriter(writer)
@@ -59,6 +60,11 @@ func GzipFilePlainGo(dstFilename string, srcFilename string) (err error) {
 	if err != nil {
 		return fmt.Errorf("error compressing file: %w", err)
 	}
+	defer func() {
+		if err != nil {
+			os.Remove(dstFilename)
+		}
+	}()
 	defer func() {
 		closeErr := writer.Close()
 		if closeErr != nil {
@@ -114,6 +120,11 @@ func GzipFileErrflowLite(dstFilename string, srcFilename string) (err error) {
 	if err != nil {
 		return fmt.Errorf("error compressing file: %w", err)
 	}
+	defer func() {
+		if err != nil {
+			os.Remove(dstFilename)
+		}
+	}()
 	defer errflow.IfErrorAssignTo(&err, writer.Close())
 
 	gzipWriter := gzip.NewWriter(writer)

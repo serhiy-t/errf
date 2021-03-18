@@ -80,6 +80,11 @@ func (ef *Errflow) Opts() []ErrflowOption {
 	return result
 }
 
+// AsOpts returns ErrflowOption copies all configs of Errflow.
+func (ef *Errflow) AsOpts() ErrflowOption {
+	return OptsFrom(ef)
+}
+
 // With is an alias for DefaultErrflow.With(...).
 func With(options ...ErrflowOption) *Errflow {
 	return DefaultErrflow.With(options...)

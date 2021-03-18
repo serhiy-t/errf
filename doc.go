@@ -191,6 +191,47 @@
 //  	// business logic ...
 //  }
 //
+// Handlers
+//
+// Handlers are used to handle errors and panics that are bubbling up the defers ladder.
+//
+// Unlike IfError()... handler, Handle() API can be used in a middle of the function, thus
+// e.g. skipped if preparation steps haven't been executed yet.
+//
+// This might be useful for additional cleanup logic. Consider function that
+// copies files. If there is an error during copying, we would want to delete destination
+// file rather than leaving it in inconsistent state. But, unlike closing a file, this action
+// needs to be performed only when there's an error and should not be performed on a successful
+// copy.
+//
+// Here's how handlers can be used to implement this logic:
+//
+//  func copyfile(src, dst string) (err error) {
+//  	defer errf.IfError().ThenAssignTo(&err)
+//
+//  	/* some code */
+//
+//  	writer := errf.Io.WriteCloser(os.Create(filename))
+//  	defer errf.Handle().OnAnyErrorOrPanic(func() { os.Remove(filename) })
+//  	defer errf.CheckErr(writer.Close())
+//
+//  	/* more code */
+//  }
+//
+// For full list of handlers, see documentation for:
+//  * (*InterimHandler) On* methods
+//  * (*InterimHandler) {Always, Everything}  methods
+//
+// Notes:
+//  * Handle() API should be used only in defer statements.
+//  * Handlers with "Err" in the name (e.g. OnErr, OnErrOrPanic) can only be used
+//    in functions with IfError() handler.
+//  * Handlers without "Err" in the name (e.g. Always, OnPanic) can be used
+//    in any function.
+//  * It is allowed to use Check* funcions inside Handlers even without IfError() set up
+//    inside a handler. In such cases, defer Handle()... enclosing function IfError()
+//    will be used to catch errors.
+//
 // Custom log function
 //
 // Custom log function can be set using SetLogFn method:

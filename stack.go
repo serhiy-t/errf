@@ -48,7 +48,11 @@ func parseErrorStackTrace(debugStack string) parsedStack {
 			idx += 2
 			continue
 		}
-		if strings.Contains(lines[idx], "/errf.") && !strings.Contains(lines[idx+1], "_test.go") {
+		if (strings.Contains(lines[idx], "/errf.") && !strings.Contains(lines[idx+1], "_test.go")) ||
+			strings.Contains(lines[idx], "SkipInErrfStackTrace(") {
+			continue
+		}
+		if idx+4 < len(lines) && strings.Contains(lines[idx+4], "/errf.(*InterimHandler).handle(") {
 			continue
 		}
 		break

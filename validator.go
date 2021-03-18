@@ -65,15 +65,17 @@ type validator interface {
 	leave()
 	markPanic()
 	validate()
+	custom(func())
 }
 
 type noopValidator struct {
 }
 
-func (v *noopValidator) enter()     {}
-func (v *noopValidator) leave()     {}
-func (v *noopValidator) markPanic() {}
-func (v *noopValidator) validate()  {}
+func (v *noopValidator) enter()        {}
+func (v *noopValidator) leave()        {}
+func (v *noopValidator) markPanic()    {}
+func (v *noopValidator) validate()     {}
+func (v *noopValidator) custom(func()) {}
 
 type stackTraceValidator struct {
 }
@@ -92,6 +94,10 @@ func (v *stackTraceValidator) markPanic() {
 
 func (v *stackTraceValidator) validate() {
 	getGoroutineErrflowStack().validate()
+}
+
+func (v *stackTraceValidator) custom(fn func()) {
+	fn()
 }
 
 type errflowStack struct {

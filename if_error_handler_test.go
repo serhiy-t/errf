@@ -31,6 +31,32 @@ func TestIfErrorHandler_Then(t *testing.T) {
 	assert.EqualError(t, outErr, "test error")
 }
 
+func TestIfErrorHandler_Then_Multiple(t *testing.T) {
+	var errs []error
+	fn := func(returnErr error) {
+		defer IfError().Then(
+			func(err error) {
+				errs = append(errs, fmt.Errorf("then 1: %w", err))
+			},
+			func(err error) {
+				errs = append(errs, fmt.Errorf("then 2: %w", err))
+			},
+			func(err error) {
+				errs = append(errs, fmt.Errorf("then 3: %w", err))
+			},
+		)
+		CheckErr(returnErr)
+	}
+
+	fn(nil)
+	assert.Empty(t, errs)
+	fn(fmt.Errorf("test error"))
+	assert.Len(t, errs, 3)
+	assert.EqualError(t, errs[0], "then 1: test error")
+	assert.EqualError(t, errs[1], "then 2: test error")
+	assert.EqualError(t, errs[2], "then 3: test error")
+}
+
 func TestIfErrorHandler_ThenIgnore(t *testing.T) {
 	fn := func(returnErr error) (err error) {
 		defer IfError().ThenIgnore()

@@ -55,9 +55,16 @@ func (c *IfErrorHandler) ThenAssignTo(outErr *error) {
 	})
 }
 
-// Then calls a callback for resulting error (only if non-nil).
-func (c *IfErrorHandler) Then(fn func(err error)) {
-	c.catch(recover(), fn)
+// ErrorActionFn is a callback for errors handlers.
+type ErrorActionFn func(err error)
+
+// Then calls callbacks for resulting error (only if non-nil).
+func (c *IfErrorHandler) Then(fns ...ErrorActionFn) {
+	c.catch(recover(), func(err error) {
+		for _, fn := range fns {
+			fn(err)
+		}
+	})
 }
 
 // ThenIgnore ignores resulting error.
@@ -128,7 +135,7 @@ func isUnrelatedPanic(recoverObj interface{}) bool {
 	return false
 }
 
-func (c *IfErrorHandler) catch(recoverObj interface{}, fn func(err error)) {
+func (c *IfErrorHandler) catch(recoverObj interface{}, fn ErrorActionFn) {
 	if isUnrelatedPanic(recoverObj) {
 		globalErrflowValidator.markPanic()
 	}

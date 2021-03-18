@@ -8,12 +8,15 @@ Declarative error handling for Go.
 
 ## Motivation
 
-See articles:
-* [Error Handling — Problem Overview](https://go.googlesource.com/proposal/+/master/design/go2draft-error-handling-overview.md)
+Reading list:
 * [Don't defer Close() on writable files
 ](https://www.joeshaw.org/dont-defer-close-on-writable-files/)
+* [Error Handling — Problem Overview](https://go.googlesource.com/proposal/+/master/design/go2draft-error-handling-overview.md)
+* [Proposal: A built-in Go error check function](https://github.com/golang/proposal/blob/master/design/32437-try-builtin.md)
+* [5 More Gotchas of Defer in Go — Part III — #3 — Not checking for errors](https://blog.learngoprogramming.com/5-gotchas-of-defer-in-go-golang-part-iii-36a1ab3d6ef1)
+* [[golang-nuts] "defer f.Close()" - error return ignored?](https://groups.google.com/g/golang-nuts/c/7Ek7Uo7vSqU)
 
-ErrorFlow goal is to provide a library solution to the issues above.
+ErrorFlow goal is to provide a library solution to the issues raised in articles above.
 
 Library solution (as opposed to a language change), although less cleaner, has a very important benefit: it is optional.
 Many language proposals for addressing this issue have been rejected because language change is required to be universally applicable.
@@ -70,6 +73,7 @@ defer func() {
 Error handling requirements for function:
 * Returns error only in case of error that
 affects result file correctness.
+* Cleans up dst file in case of the error instead of leaving it in inconsistent state.
 * Logs all internal errors that it didn't return.
 * Wraps returned errors with "error compressing file: " prefix.
 * Performs input parameters validation.
@@ -93,6 +97,7 @@ func GzipFile(dstFilename string, srcFilename string) (err error) {
 	defer errf.With(errWrapper).Log(reader.Close())
 
 	writer := errf.Io.CheckWriteCloser(os.Create(dstFilename))
+	defer errf.Handle().OnAnyErrOrPanic(func() { os.Remove(dstFilename) })
 	defer errf.CheckErr(writer.Close())
 
 	gzipWriter := gzip.NewWriter(writer)
@@ -153,6 +158,11 @@ func GzipFile(dstFilename string, srcFilename string) (err error) {
 		return fmt.Errorf("error compressing file: %w", err)
 	}
 	defer func() {
+		if err != nil {
+			os.Remove(dstFilename)
+		}
+	}()
+	defer func() {
 		closeErr := writer.Close()
 		if closeErr != nil {
 			if err == nil {
@@ -212,6 +222,11 @@ func GzipFile(dstFilename string, srcFilename string) (err error) {
 	if err != nil {
 		return fmt.Errorf("error compressing file: %w", err)
 	}
+	defer func() {
+		if err != nil {
+			os.Remove(dstFilename)
+		}
+	}()
 	defer errflow.IfErrorAssignTo(&err, writer.Close())
 
 	gzipWriter := gzip.NewWriter(writer)
