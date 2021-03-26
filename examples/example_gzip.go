@@ -24,7 +24,7 @@ func GzipFileErrflow(dstFilename string, srcFilename string) (err error) {
 	errf.CheckCondition(len(srcFilename) == 0, "src file should be specified")
 
 	reader := errf.Io.CheckReadCloser(os.Open(srcFilename))
-	defer errf.With(errWrapper).Log(reader.Close())
+	defer errf.With(errWrapper).LogDefer(reader.Close)
 
 	writer := errf.Io.CheckWriteCloser(os.Create(dstFilename))
 	defer errf.Handle().OnAnyErrOrPanic(func() { os.Remove(dstFilename) })
@@ -114,7 +114,7 @@ func GzipFileErrflowLite(dstFilename string, srcFilename string) (err error) {
 	if err != nil {
 		return fmt.Errorf("error compressing file: %w", err)
 	}
-	defer errflow.Log(reader.Close())
+	defer errflow.LogDefer(reader.Close)
 
 	writer, err := os.Create(dstFilename)
 	if err != nil {
