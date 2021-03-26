@@ -216,7 +216,7 @@ func GzipFile(dstFilename string, srcFilename string) (err error) {
 	if err != nil {
 		return fmt.Errorf("error compressing file: %w", err)
 	}
-	defer errflow.Log(reader.Close())
+	defer errflow.LogDefer(reader.Close)
 
 	writer, err := os.Create(dstFilename)
 	if err != nil {
