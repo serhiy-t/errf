@@ -296,6 +296,6 @@ func (ef *Errflow) LogDefer(closeFn func() error) error {
 }
 
 // LogDefer is an alias for DefaultErrflow.LogDefer(...).
-func LogDefer(err error) error {
-	return DefaultErrflow.Log(err)
+func LogDefer(closeFn func() error) error {
+	return DefaultErrflow.LogDefer(closeFn)
 }
