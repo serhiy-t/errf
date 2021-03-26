@@ -18,6 +18,17 @@ func TestErrflow_CheckErr(t *testing.T) {
 	assert.EqualError(t, fn(), "error1 (also: error2)")
 }
 
+func TestErrflow_CheckDeferErr(t *testing.T) {
+	fn := func() (err error) {
+		defer IfError().ReturnWrapped().ThenAssignTo(&err)
+		defer With().CheckDeferErr(errorFn("error2"))
+		defer CheckDeferErr(errorFn("error1"))
+		return nil
+	}
+
+	assert.EqualError(t, fn(), "error1 (also: error2)")
+}
+
 func TestErrflow_CheckErr_unrelatedPanic(t *testing.T) {
 	fn := func() (err error) {
 		defer IfError().ThenAssignTo(&err)
@@ -75,6 +86,22 @@ func TestErrflow_Log(t *testing.T) {
 	fn := func() (err error) {
 		defer IfError().LogNever().ThenAssignTo(&err)
 		defer With(WrapperFmtErrorw("wrapped")).Log(fmt.Errorf("error message"))
+		return nil
+	}
+
+	assert.NoError(t, fn())
+	assert.Equal(t, []string{"wrapped: error message"}, logs)
+}
+
+func TestErrflow_LogDefer(t *testing.T) {
+	var logs []string
+	defer SetLogFn(func(logMessage *LogMessage) {
+		logs = append(logs, fmt.Sprintf(logMessage.Format, logMessage.A...))
+	}).ThenRestore()
+
+	fn := func() (err error) {
+		defer IfError().LogNever().ThenAssignTo(&err)
+		defer With(WrapperFmtErrorw("wrapped")).LogDefer(errorFn("error message"))
 		return nil
 	}
 

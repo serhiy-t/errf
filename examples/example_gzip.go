@@ -28,10 +28,10 @@ func GzipFileErrflow(dstFilename string, srcFilename string) (err error) {
 
 	writer := errf.Io.CheckWriteCloser(os.Create(dstFilename))
 	defer errf.Handle().OnAnyErrOrPanic(func() { os.Remove(dstFilename) })
-	defer errf.CheckErr(writer.Close())
+	defer errf.CheckDeferErr(writer.Close)
 
 	gzipWriter := gzip.NewWriter(writer)
-	defer errf.CheckErr(gzipWriter.Close())
+	defer errf.CheckDeferErr(gzipWriter.Close)
 
 	return errf.CheckDiscard(io.Copy(gzipWriter, reader))
 }
@@ -125,10 +125,10 @@ func GzipFileErrflowLite(dstFilename string, srcFilename string) (err error) {
 			os.Remove(dstFilename)
 		}
 	}()
-	defer errflow.IfErrorAssignTo(&err, writer.Close())
+	defer errflow.IfErrorAssignTo(&err, writer.Close)
 
 	gzipWriter := gzip.NewWriter(writer)
-	defer errflow.IfErrorAssignTo(&err, gzipWriter.Close())
+	defer errflow.IfErrorAssignTo(&err, gzipWriter.Close)
 
 	_, err = io.Copy(gzipWriter, reader)
 	if err != nil {

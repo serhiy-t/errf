@@ -17,12 +17,12 @@ import (
 //  	writer, err := openWriter(...)
 //  	defer errf.With(
 //  		errf.LogStrategyIfSuppressed,
-//  	).IfErrorAssignTo(&err,
-//  		writer.Close())
+//  	).IfErrorAssignTo(&err, writer.Close)
 //
 //  	// ...
 //  }
-func (ef *Errflow) IfErrorAssignTo(outErr *error, err error) {
+func (ef *Errflow) IfErrorAssignTo(outErr *error, closeFn func() error) {
+	err := closeFn()
 	ef.applyDeferredOptions()
 	if maySuppressFirstError(ef.returnStrategy) {
 		panic(fmt.Errorf("%v is not supported for IfErrorAssignTo(...)", ef.returnStrategy))
@@ -57,6 +57,6 @@ func (ef *Errflow) IfErrorAssignTo(outErr *error, err error) {
 }
 
 // IfErrorAssignTo is an alias for DefaultErrflow.IfErrorAssignTo(...).
-func IfErrorAssignTo(outErr *error, err error) {
-	DefaultErrflow.IfErrorAssignTo(outErr, err)
+func IfErrorAssignTo(outErr *error, closeFn func() error) {
+	DefaultErrflow.IfErrorAssignTo(outErr, closeFn)
 }

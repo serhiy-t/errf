@@ -180,6 +180,19 @@ func CheckErr(err error) error {
 	return DefaultErrflow.ImplementCheck(recover(), err)
 }
 
+// CheckDeferErr calls closeFn and checks for return error.
+// Useful in defer statements:
+//  writer := ...
+//  defer errf.CheckDeferErr(writer.Close)
+func (ef *Errflow) CheckDeferErr(closeFn func() error) error {
+	return ef.ImplementCheck(recover(), closeFn())
+}
+
+// CheckDeferErr is an alias for DefaultErrflow.CheckDeferErr(...).
+func CheckDeferErr(closeFn func() error) error {
+	return DefaultErrflow.ImplementCheck(recover(), closeFn())
+}
+
 // CheckAny sends error to IfError() handler for processing, if there is an error.
 // If there is no error, it returns value as a generic interface{}.
 //
@@ -188,7 +201,7 @@ func CheckErr(err error) error {
 //    defer errf.IfError().ThenAssignTo(&err)
 //
 //    file := errf.CheckAny(os.Create("file.go")).(*os.File)
-//    defer errf.CheckErr(file.Close())
+//    defer errf.CheckDeferErr(file.Close)
 //
 //    // Write to file ...
 //  }
@@ -201,7 +214,7 @@ func CheckErr(err error) error {
 //    defer errf.IfError().ThenAssignTo(&err)
 //
 //    writer := errf.Io.CheckWriteCloser(os.Create("file.go"))
-//    defer errf.CheckErr(writer.Close())
+//    defer errf.CheckDeferErr(writer.Close)
 //
 //    // Write to file ...
 //  }
@@ -271,5 +284,18 @@ func (ef *Errflow) Log(err error) error {
 
 // Log is an alias for DefaultErrflow.Log(...).
 func Log(err error) error {
+	return DefaultErrflow.Log(err)
+}
+
+// LogDefer calls closeFn, then calls Log(...) on result of a call.
+// Useful in defer statements:
+//  reader := ...
+//  defer errf.LogDefer(reader.Close)
+func (ef *Errflow) LogDefer(closeFn func() error) error {
+	return ef.Log(closeFn())
+}
+
+// LogDefer is an alias for DefaultErrflow.LogDefer(...).
+func LogDefer(err error) error {
 	return DefaultErrflow.Log(err)
 }

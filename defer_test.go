@@ -7,10 +7,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func errorFn(e string) func() error {
+	return func() error { return fmt.Errorf("%s", e) }
+}
+
 func Test_IfErrorAssignTo_Default(t *testing.T) {
 	fn := func() (err error) {
-		defer IfErrorAssignTo(&err, fmt.Errorf("error2"))
-		defer IfErrorAssignTo(&err, fmt.Errorf("error1"))
+		defer IfErrorAssignTo(&err, errorFn("error2"))
+		defer IfErrorAssignTo(&err, errorFn("error1"))
 		return nil
 	}
 
@@ -30,9 +34,9 @@ func Test_IfErrorAssignTo_ReturnStrategyLast_panics(t *testing.T) {
 
 func Test_IfErrorAssignTo_ReturnStrategyWrapped(t *testing.T) {
 	fn := func() (err error) {
-		defer With(ReturnStrategyWrapped).IfErrorAssignTo(&err, fmt.Errorf("error3"))
-		defer With(ReturnStrategyWrapped).IfErrorAssignTo(&err, fmt.Errorf("error2"))
-		defer IfErrorAssignTo(&err, fmt.Errorf("error1"))
+		defer With(ReturnStrategyWrapped).IfErrorAssignTo(&err, errorFn("error3"))
+		defer With(ReturnStrategyWrapped).IfErrorAssignTo(&err, errorFn("error2"))
+		defer IfErrorAssignTo(&err, errorFn("error1"))
 		return nil
 	}
 
@@ -41,9 +45,9 @@ func Test_IfErrorAssignTo_ReturnStrategyWrapped(t *testing.T) {
 
 func Test_IfErrorAssignTo_ReturnStrategy(t *testing.T) {
 	fn := func() (err error) {
-		defer With(ReturnStrategyWrapped).IfErrorAssignTo(&err, fmt.Errorf("error3"))
-		defer With(ReturnStrategyWrapped).IfErrorAssignTo(&err, fmt.Errorf("error2"))
-		defer IfErrorAssignTo(&err, fmt.Errorf("error1"))
+		defer With(ReturnStrategyWrapped).IfErrorAssignTo(&err, errorFn("error3"))
+		defer With(ReturnStrategyWrapped).IfErrorAssignTo(&err, errorFn("error2"))
+		defer IfErrorAssignTo(&err, errorFn("error1"))
 		return nil
 	}
 
@@ -57,9 +61,9 @@ func Test_IfErrorAssignTo_LogAll(t *testing.T) {
 	}).ThenRestore()
 
 	fn := func() (err error) {
-		defer IfErrorAssignTo(&err, fmt.Errorf("error3"))
-		defer With(LogStrategyAlways).IfErrorAssignTo(&err, fmt.Errorf("error2"))
-		defer With(LogStrategyAlways).IfErrorAssignTo(&err, fmt.Errorf("error1"))
+		defer IfErrorAssignTo(&err, errorFn("error3"))
+		defer With(LogStrategyAlways).IfErrorAssignTo(&err, errorFn("error2"))
+		defer With(LogStrategyAlways).IfErrorAssignTo(&err, errorFn("error1"))
 		return nil
 	}
 
@@ -76,8 +80,8 @@ func Test_IfErrorAssignTo_LogIfSuppressed(t *testing.T) {
 	fn := func() (err error) {
 		defer With(
 			LogStrategyIfSuppressed, ReturnStrategyFirst,
-		).IfErrorAssignTo(&err, fmt.Errorf("error2"))
-		defer IfErrorAssignTo(&err, fmt.Errorf("error1"))
+		).IfErrorAssignTo(&err, errorFn("error2"))
+		defer IfErrorAssignTo(&err, errorFn("error1"))
 		return nil
 	}
 

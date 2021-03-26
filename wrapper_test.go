@@ -39,7 +39,7 @@ func Test_Wrapper_IfErrorAssignTo(t *testing.T) {
 	fn := func() (err error) {
 		defer With(Wrapper(func(err error) error {
 			return fmt.Errorf("wrapped: %w", err)
-		})).IfErrorAssignTo(&err, fmt.Errorf("error1"))
+		})).IfErrorAssignTo(&err, errorFn("error1"))
 		return nil
 	}
 

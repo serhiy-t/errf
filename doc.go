@@ -213,7 +213,7 @@
 //
 //  	writer := errf.Io.WriteCloser(os.Create(filename))
 //  	defer errf.Handle().OnAnyErrorOrPanic(func() { os.Remove(filename) })
-//  	defer errf.CheckErr(writer.Close())
+//  	defer errf.CheckDeferErr(writer.Close)
 //
 //  	/* more code */
 //  }
