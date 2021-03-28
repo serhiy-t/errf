@@ -91,7 +91,7 @@ func Test_Io_CheckWriterErr(t *testing.T) {
 		actual, checkErr := Io.CheckWriterErr(value, nil)
 		assert.Same(t, value, actual)
 		assert.Nil(t, checkErr)
-		_ ,_ = Io.CheckWriterErr(value, fmt.Errorf("error"))
+		_, _ = Io.CheckWriterErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -106,7 +106,7 @@ func Test_Io_CheckWriteCloserErr(t *testing.T) {
 		actual, checkErr := Io.CheckWriteCloserErr(value, nil)
 		assert.Same(t, value, actual)
 		assert.Nil(t, checkErr)
-		_ ,_ = Io.CheckWriteCloserErr(value, fmt.Errorf("error"))
+		_, _ = Io.CheckWriteCloserErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -121,7 +121,7 @@ func Test_Io_CheckReaderErr(t *testing.T) {
 		actual, checkErr := Io.CheckReaderErr(value, nil)
 		assert.Same(t, value, actual)
 		assert.Nil(t, checkErr)
-		_ ,_ = Io.CheckReaderErr(value, fmt.Errorf("error"))
+		_, _ = Io.CheckReaderErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -136,7 +136,7 @@ func Test_Io_CheckReadCloserErr(t *testing.T) {
 		actual, checkErr := Io.CheckReadCloserErr(value, nil)
 		assert.Same(t, value, actual)
 		assert.Nil(t, checkErr)
-		_ ,_ = Io.CheckReadCloserErr(value, fmt.Errorf("error"))
+		_, _ = Io.CheckReadCloserErr(value, fmt.Errorf("error"))
 		return nil
 	}
 

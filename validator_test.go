@@ -46,7 +46,7 @@ func TestValidator_DisabledValidator(t *testing.T) {
 	}
 	assert.NoError(t, fn())
 	assert.NotPanics(t, func() {
-		_ =fn()
+		_ = fn()
 	})
 }
 
