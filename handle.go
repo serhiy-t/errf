@@ -200,6 +200,33 @@ func GetPanic(err error, panicObj *interface{}) bool {
 	return ok
 }
 
+func handleDoPanicOnError(errflowThrowObj errflowThrow) {
+	fnRecover := recover()
+	fnErrflowThrow, isFnErrflowThrow := fnRecover.(errflowThrow)
+	if fnRecover == nil {
+		panic(errflowThrowObj)
+	} else if isFnErrflowThrow {
+		var combinedErrflowThrow errflowThrow
+		combinedErrflowThrow.items = append(combinedErrflowThrow.items, errflowThrowObj.items...)
+		combinedErrflowThrow.items = append(combinedErrflowThrow.items, fnErrflowThrow.items...)
+		panic(combinedErrflowThrow)
+	} else {
+		panic(fnRecover)
+	}
+}
+
+func handleDoPanicOnPanic(recoverObj interface{}) {
+	fnRecover := recover()
+	_, isFnErrflowThrow := fnRecover.(errflowThrow)
+	if fnRecover == nil {
+		panic(recoverObj)
+	} else if isFnErrflowThrow {
+		panic(recoverObj)
+	} else {
+		panic(fnRecover)
+	}
+}
+
 func (h *InterimHandler) handle(
 	recoverObj interface{},
 	condition handleCondition,
@@ -223,35 +250,12 @@ func (h *InterimHandler) handle(
 			if ef.wrapper != nil && err != nil {
 				err = ef.wrapper(err)
 			}
-			defer func() {
-				fnRecover := recover()
-				fnErrflowThrow, isFnErrflowThrow := fnRecover.(errflowThrow)
-				if fnRecover == nil {
-					panic(errflowThrowObj)
-				} else if isFnErrflowThrow {
-					var combinedErrflowThrow errflowThrow
-					combinedErrflowThrow.items = append(combinedErrflowThrow.items, errflowThrowObj.items...)
-					combinedErrflowThrow.items = append(combinedErrflowThrow.items, fnErrflowThrow.items...)
-					panic(combinedErrflowThrow)
-				} else {
-					panic(fnRecover)
-				}
-			}()
+			defer handleDoPanicOnError(errflowThrowObj)
 			if condition.onError {
 				fn(err)
 			}
 		} else {
-			defer func() {
-				fnRecover := recover()
-				_, isFnErrflowThrow := fnRecover.(errflowThrow)
-				if fnRecover == nil {
-					panic(recoverObj)
-				} else if isFnErrflowThrow {
-					panic(recoverObj)
-				} else {
-					panic(fnRecover)
-				}
-			}()
+			defer handleDoPanicOnPanic(recoverObj)
 			if condition.onPanic {
 				fn(PanicErr{PanicObj: recoverObj})
 			}
