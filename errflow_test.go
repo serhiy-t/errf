@@ -37,7 +37,7 @@ func TestErrflow_CheckErr_unrelatedPanic(t *testing.T) {
 	}
 
 	assert.PanicsWithValue(t, "hello", func() {
-		fn()
+		_ = fn()
 	})
 }
 
@@ -71,6 +71,19 @@ func TestErrflow_CheckCondition(t *testing.T) {
 		defer With().CheckCondition(true, "error %d", 3)
 		defer CheckCondition(false, "error %d", 2)
 		defer CheckCondition(true, "error %d", 1)
+		return nil
+	}
+
+	assert.EqualError(t, fn(), "error 1 (also: error 3)")
+}
+
+func TestErrflow_CheckAssert(t *testing.T) {
+	fn := func() (err error) {
+		defer IfError().ReturnWrapped().ThenAssignTo(&err)
+		defer With().CheckAssert(true, "error %d", 4)
+		defer With().CheckAssert(false, "error %d", 3)
+		defer CheckAssert(true, "error %d", 2)
+		defer CheckAssert(false, "error %d", 1)
 		return nil
 	}
 
@@ -113,7 +126,7 @@ func TestErrflow_ErrorIf(t *testing.T) {
 	fn := func(returnErr bool) (err error) {
 		defer IfError().ThenAssignTo(&err)
 
-		return CheckCondition(returnErr, "test error")
+		return CheckCondition(returnErr, "test error").IfOkReturnNil
 	}
 
 	assert.Nil(t, fn(false))
@@ -132,7 +145,7 @@ func TestErrflow_Error_With(t *testing.T) {
 		defer With(options...).CheckErr(fmt.Errorf("error3"))
 		defer With(options...).CheckErr(fmt.Errorf("error2"))
 
-		return With(options...).CheckErr(fmt.Errorf("error1"))
+		return With(options...).CheckErr(fmt.Errorf("error1")).IfOkReturnNil
 	}
 
 	assert.EqualError(t, fn(ReturnStrategyFirst, LogStrategyAlways), "error1")
@@ -163,7 +176,7 @@ func TestErrflow_IfError_Apply(t *testing.T) {
 		defer CheckErr(fmt.Errorf("error3"))
 		defer CheckErr(fmt.Errorf("error2"))
 
-		return CheckErr(fmt.Errorf("error1"))
+		return CheckErr(fmt.Errorf("error1")).IfOkReturnNil
 	}
 
 	assert.EqualError(t, fn(ReturnStrategyFirst, LogStrategyAlways), "error1")

@@ -8,7 +8,7 @@ import (
 // Clients should never set its value.
 var DefaultErrflow = &Errflow{}
 
-// Errflow contains configuration for error hanlding logic.
+// Errflow contains configuration for error handling logic.
 // It exposes an immutable API for clients, but it is not thread-safe.
 type Errflow struct {
 	wrapper func(err error) error
@@ -59,11 +59,12 @@ type ErrflowOption func(ef *Errflow) *Errflow
 // With adds additional configs to Errflow instance.
 // It returns a new instance. Original instance is unmodified.
 func (ef *Errflow) With(options ...ErrflowOption) *Errflow {
-	if ef == nil {
-		ef = DefaultErrflow
+	errflow := ef
+	if errflow == nil {
+		errflow = DefaultErrflow
 	}
-	result := ef.copy()
-	result.deferredOptions = append([]ErrflowOption{}, ef.deferredOptions...)
+	result := errflow.copy()
+	result.deferredOptions = append([]ErrflowOption{}, errflow.deferredOptions...)
 	result.deferredOptions = append(result.deferredOptions, options...)
 	return result
 }
@@ -97,6 +98,13 @@ type errflowThrowItem struct {
 
 type errflowThrow struct {
 	items []errflowThrowItem
+}
+
+// CheckResult default object is returned by Check* functions
+// which don't return any value, as a helper for return statements:
+//  return errf.CheckErr(err).IfOkReturnNil
+type CheckResult struct {
+	IfOkReturnNil error
 }
 
 // ImplementCheck is used to implement a strongly-typed errflow.Check(...) for new types.
@@ -134,9 +142,10 @@ type errflowThrow struct {
 //
 //  	// ...
 //  }
-func (ef *Errflow) ImplementCheck(recoverObj interface{}, err error) error {
-	if ef == nil {
-		ef = DefaultErrflow
+func (ef *Errflow) ImplementCheck(recoverObj interface{}, err error) CheckResult {
+	errflow := ef
+	if errflow == nil {
+		errflow = DefaultErrflow
 	}
 	globalErrflowValidator.validate()
 
@@ -151,14 +160,14 @@ func (ef *Errflow) ImplementCheck(recoverObj interface{}, err error) error {
 	}
 	if err != nil {
 		errflowThrowObj.items = append(errflowThrowObj.items, errflowThrowItem{
-			ef:  ef,
+			ef:  errflow,
 			err: err,
 		})
 	}
 	if len(errflowThrowObj.items) > 0 {
 		panic(errflowThrowObj)
 	}
-	return err
+	return CheckResult{}
 }
 
 // CheckErr sends error to IfError() handler for processing, if there is an error.
@@ -171,12 +180,12 @@ func (ef *Errflow) ImplementCheck(recoverObj interface{}, err error) error {
 //   return nil
 // is the same as:
 //   return errflow.CheckErr(functionCall())
-func (ef *Errflow) CheckErr(err error) error {
+func (ef *Errflow) CheckErr(err error) CheckResult {
 	return ef.ImplementCheck(recover(), err)
 }
 
 // CheckErr is an alias for DefaultErrflow.CheckErr(...).
-func CheckErr(err error) error {
+func CheckErr(err error) CheckResult {
 	return DefaultErrflow.ImplementCheck(recover(), err)
 }
 
@@ -184,12 +193,12 @@ func CheckErr(err error) error {
 // Useful in defer statements:
 //  writer := ...
 //  defer errf.CheckDeferErr(writer.Close)
-func (ef *Errflow) CheckDeferErr(closeFn func() error) error {
+func (ef *Errflow) CheckDeferErr(closeFn func() error) CheckResult {
 	return ef.ImplementCheck(recover(), closeFn())
 }
 
 // CheckDeferErr is an alias for DefaultErrflow.CheckDeferErr(...).
-func CheckDeferErr(closeFn func() error) error {
+func CheckDeferErr(closeFn func() error) CheckResult {
 	return DefaultErrflow.ImplementCheck(recover(), closeFn())
 }
 
@@ -238,39 +247,58 @@ func CheckAny(value interface{}, err error) interface{} {
 //
 //    return errf.CheckDiscard(w.Write(buf))
 //  }
-func (ef *Errflow) CheckDiscard(value interface{}, err error) error {
+func (ef *Errflow) CheckDiscard(_ interface{}, err error) CheckResult {
 	return ef.ImplementCheck(recover(), err)
 }
 
 // CheckDiscard is an alias for DefaultErrflow.CheckDiscard(...).
-func CheckDiscard(value interface{}, err error) error {
+func CheckDiscard(_ interface{}, err error) CheckResult {
 	return DefaultErrflow.ImplementCheck(recover(), err)
 }
 
 // CheckCondition creates and sends error to IfError() handler for processing, if condition is true.
-func (ef *Errflow) CheckCondition(condition bool, format string, a ...interface{}) error {
+func (ef *Errflow) CheckCondition(condition bool, format string, a ...interface{}) CheckResult {
 	if condition {
 		return ef.ImplementCheck(recover(), fmt.Errorf(format, a...))
 	}
-	return nil
+	return CheckResult{}
 }
 
 // CheckCondition is an alias for DefaultErrflow.CheckCondition(...).
-func CheckCondition(condition bool, format string, a ...interface{}) error {
+func CheckCondition(condition bool, format string, a ...interface{}) CheckResult {
 	if condition {
 		return DefaultErrflow.ImplementCheck(recover(), fmt.Errorf(format, a...))
 	}
-	return nil
+	return CheckResult{}
+}
+
+// CheckAssert creates and sends error to IfError() handler for processing, if condition is false.
+func (ef *Errflow) CheckAssert(condition bool, format string, a ...interface{}) CheckResult {
+	if !condition {
+		return ef.ImplementCheck(recover(), fmt.Errorf(format, a...))
+	}
+	return CheckResult{}
+}
+
+// CheckAssert is an alias for DefaultErrflow.CheckAssert(...).
+func CheckAssert(condition bool, format string, a ...interface{}) CheckResult {
+	if !condition {
+		return DefaultErrflow.ImplementCheck(recover(), fmt.Errorf(format, a...))
+	}
+	return CheckResult{}
 }
 
 // Log logs error, if not nil.
 // Always logs, even if log strategy is LogStrategyNever.
 // Doesn't affect control flow.
-func (ef *Errflow) Log(err error) error {
+func (ef *Errflow) Log(err error) {
 	if err != nil {
 		ef.applyDeferredOptions()
 		if ef.wrapper != nil {
 			err = ef.wrapper(err)
+		}
+		if err == nil {
+			panic("error wrapper returned nil error")
 		}
 		globalLogFn(&LogMessage{
 			Format: "%s",
@@ -279,23 +307,22 @@ func (ef *Errflow) Log(err error) error {
 			Tags:   []string{"errorflow", "error"},
 		})
 	}
-	return err
 }
 
 // Log is an alias for DefaultErrflow.Log(...).
-func Log(err error) error {
-	return DefaultErrflow.Log(err)
+func Log(err error) {
+	DefaultErrflow.Log(err)
 }
 
 // LogDefer calls closeFn, then calls Log(...) on result of a call.
 // Useful in defer statements:
 //  reader := ...
 //  defer errf.LogDefer(reader.Close)
-func (ef *Errflow) LogDefer(closeFn func() error) error {
-	return ef.Log(closeFn())
+func (ef *Errflow) LogDefer(closeFn func() error) {
+	ef.Log(closeFn())
 }
 
 // LogDefer is an alias for DefaultErrflow.LogDefer(...).
-func LogDefer(closeFn func() error) error {
-	return DefaultErrflow.LogDefer(closeFn)
+func LogDefer(closeFn func() error) {
+	DefaultErrflow.LogDefer(closeFn)
 }

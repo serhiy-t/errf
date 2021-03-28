@@ -25,7 +25,7 @@ type InterimHandler struct{}
 //    in functions with IfError() handler.
 //  * Handlers without "Err" in the name (e.g. Always, OnPanic) can be used
 //    in any function.
-//  * It is allowed to use Check* funcions inside Handlers even without IfError() set up
+//  * It is allowed to use Check* functions inside Handlers even without IfError() set up
 //    inside a handler. In such cases, defer Handle()... enclosing function IfError()
 //    will be used to catch errors.
 //
@@ -37,7 +37,7 @@ type InterimHandler struct{}
 //
 //  	writer := errf.Io.WriteCloser(os.Create(filename))
 //  	defer errf.Handle().OnAnyErrorOrPanic(func() { os.Remove(filename) })
-//  	defer errf.CheckErr(writer.Close())
+//  	defer errf.CheckDeferErr(writer.Close)
 //
 //  	/* more code */
 //  }

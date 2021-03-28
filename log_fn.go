@@ -9,24 +9,24 @@ import (
 // LogFn defines logger function API for errflow.
 type LogFn func(logMessage *LogMessage)
 
-var globalLogFn = defaulGlobalLogFn(func(s string) {
+var globalLogFn = defaultGlobalLogFn(func(s string) {
 	log.Println(s)
 })
 
-func defaulGlobalLogFn(printFn func(string)) LogFn {
+func defaultGlobalLogFn(printFn func(string)) LogFn {
 	return func(logMessage *LogMessage) {
 		var buffer strings.Builder
 
 		for _, tag := range logMessage.Tags {
-			fmt.Fprintf(&buffer, "[%s]", tag)
+			_, _ = fmt.Fprintf(&buffer, "[%s]", tag)
 		}
 		if buffer.Len() > 0 {
-			fmt.Fprintf(&buffer, " ")
+			_, _ = fmt.Fprintf(&buffer, " ")
 		}
 
-		fmt.Fprintf(&buffer, logMessage.Format, logMessage.A...)
+		_, _ = fmt.Fprintf(&buffer, logMessage.Format, logMessage.A...)
 		if logMessage.Stack != nil {
-			fmt.Fprintf(&buffer, "\n\nStack:\n%s", logMessage.Stack())
+			_, _ = fmt.Fprintf(&buffer, "\n\nStack:\n%s", logMessage.Stack())
 		}
 
 		printFn(buffer.String())

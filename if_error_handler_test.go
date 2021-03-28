@@ -11,7 +11,7 @@ import (
 func TestIfErrorHandler_ThenAssignTo(t *testing.T) {
 	fn := func(returnErr error) (err error) {
 		defer IfError().ThenAssignTo(&err)
-		return CheckErr(returnErr)
+		return CheckErr(returnErr).IfOkReturnNil
 	}
 
 	assert.Nil(t, fn(nil))
@@ -60,7 +60,7 @@ func TestIfErrorHandler_Then_Multiple(t *testing.T) {
 func TestIfErrorHandler_ThenIgnore(t *testing.T) {
 	fn := func(returnErr error) (err error) {
 		defer IfError().ThenIgnore()
-		return CheckErr(returnErr)
+		return CheckErr(returnErr).IfOkReturnNil
 	}
 
 	assert.Nil(t, fn(nil))
@@ -131,7 +131,7 @@ func TestIfErrorHandler_LogNever(t *testing.T) {
 		return nil
 	}
 
-	fn()
+	_ = fn()
 	assert.Empty(t, logs)
 }
 
@@ -148,7 +148,7 @@ func TestIfErrorHandler_LogAlways(t *testing.T) {
 		return nil
 	}
 
-	fn()
+	_ = fn()
 	assert.Equal(t, []string{"first", "second"}, logs)
 }
 
@@ -165,7 +165,7 @@ func TestIfErrorHandler_LogIfSuppressed(t *testing.T) {
 		return nil
 	}
 
-	fn()
+	_ = fn()
 	assert.Equal(t, []string{"second"}, logs)
 }
 
@@ -181,7 +181,7 @@ func TestIfErrorHandler_UnrelatedPanic(t *testing.T) {
 	}
 
 	assert.PanicsWithError(t, "unrelated panic", func() {
-		fn()
+		_ = fn()
 	})
 }
 

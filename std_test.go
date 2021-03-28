@@ -519,7 +519,7 @@ func Test_CheckIntErr(t *testing.T) {
 		actual, checkErr := Std.CheckIntErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckIntErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckIntErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -534,7 +534,7 @@ func Test_CheckIntSliceErr(t *testing.T) {
 		actual, checkErr := Std.CheckIntSliceErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckIntSliceErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckIntSliceErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -549,7 +549,7 @@ func Test_CheckInt8Err(t *testing.T) {
 		actual, checkErr := Std.CheckInt8Err(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckInt8Err(value, fmt.Errorf("error"))
+		_, _ = Std.CheckInt8Err(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -564,7 +564,7 @@ func Test_CheckInt8SliceErr(t *testing.T) {
 		actual, checkErr := Std.CheckInt8SliceErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckInt8SliceErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckInt8SliceErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -579,7 +579,7 @@ func Test_CheckInt16Err(t *testing.T) {
 		actual, checkErr := Std.CheckInt16Err(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckInt16Err(value, fmt.Errorf("error"))
+		_, _ = Std.CheckInt16Err(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -594,7 +594,7 @@ func Test_CheckInt16SliceErr(t *testing.T) {
 		actual, checkErr := Std.CheckInt16SliceErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckInt16SliceErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckInt16SliceErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -609,7 +609,7 @@ func Test_CheckInt32Err(t *testing.T) {
 		actual, checkErr := Std.CheckInt32Err(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckInt32Err(value, fmt.Errorf("error"))
+		_, _ = Std.CheckInt32Err(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -624,7 +624,7 @@ func Test_CheckInt32SliceErr(t *testing.T) {
 		actual, checkErr := Std.CheckInt32SliceErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckInt32SliceErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckInt32SliceErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -639,7 +639,7 @@ func Test_CheckInt64Err(t *testing.T) {
 		actual, checkErr := Std.CheckInt64Err(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckInt64Err(value, fmt.Errorf("error"))
+		_, _ = Std.CheckInt64Err(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -654,7 +654,7 @@ func Test_CheckInt64SliceErr(t *testing.T) {
 		actual, checkErr := Std.CheckInt64SliceErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckInt64SliceErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckInt64SliceErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -669,7 +669,7 @@ func Test_CheckUintErr(t *testing.T) {
 		actual, checkErr := Std.CheckUintErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckUintErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckUintErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -684,7 +684,7 @@ func Test_CheckUintSliceErr(t *testing.T) {
 		actual, checkErr := Std.CheckUintSliceErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckUintSliceErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckUintSliceErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -699,7 +699,7 @@ func Test_CheckUint8Err(t *testing.T) {
 		actual, checkErr := Std.CheckUint8Err(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckUint8Err(value, fmt.Errorf("error"))
+		_, _ = Std.CheckUint8Err(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -714,7 +714,7 @@ func Test_CheckUint8SliceErr(t *testing.T) {
 		actual, checkErr := Std.CheckUint8SliceErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckUint8SliceErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckUint8SliceErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -729,7 +729,7 @@ func Test_CheckUint16Err(t *testing.T) {
 		actual, checkErr := Std.CheckUint16Err(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckUint16Err(value, fmt.Errorf("error"))
+		_, _ = Std.CheckUint16Err(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -744,7 +744,7 @@ func Test_CheckUint16SliceErr(t *testing.T) {
 		actual, checkErr := Std.CheckUint16SliceErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckUint16SliceErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckUint16SliceErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -759,7 +759,7 @@ func Test_CheckUint32Err(t *testing.T) {
 		actual, checkErr := Std.CheckUint32Err(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckUint32Err(value, fmt.Errorf("error"))
+		_, _ = Std.CheckUint32Err(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -774,7 +774,7 @@ func Test_CheckUint32SliceErr(t *testing.T) {
 		actual, checkErr := Std.CheckUint32SliceErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckUint32SliceErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckUint32SliceErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -789,7 +789,7 @@ func Test_CheckUint64Err(t *testing.T) {
 		actual, checkErr := Std.CheckUint64Err(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckUint64Err(value, fmt.Errorf("error"))
+		_, _ = Std.CheckUint64Err(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -804,7 +804,7 @@ func Test_CheckUint64SliceErr(t *testing.T) {
 		actual, checkErr := Std.CheckUint64SliceErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckUint64SliceErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckUint64SliceErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -819,7 +819,7 @@ func Test_CheckUintptrErr(t *testing.T) {
 		actual, checkErr := Std.CheckUintptrErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckUintptrErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckUintptrErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -834,7 +834,7 @@ func Test_CheckUintptrSliceErr(t *testing.T) {
 		actual, checkErr := Std.CheckUintptrSliceErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckUintptrSliceErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckUintptrSliceErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -849,7 +849,7 @@ func Test_CheckFloat32Err(t *testing.T) {
 		actual, checkErr := Std.CheckFloat32Err(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckFloat32Err(value, fmt.Errorf("error"))
+		_, _ = Std.CheckFloat32Err(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -864,7 +864,7 @@ func Test_CheckFloat32SliceErr(t *testing.T) {
 		actual, checkErr := Std.CheckFloat32SliceErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckFloat32SliceErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckFloat32SliceErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -879,7 +879,7 @@ func Test_CheckFloat64Err(t *testing.T) {
 		actual, checkErr := Std.CheckFloat64Err(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckFloat64Err(value, fmt.Errorf("error"))
+		_, _ = Std.CheckFloat64Err(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -894,7 +894,7 @@ func Test_CheckFloat64SliceErr(t *testing.T) {
 		actual, checkErr := Std.CheckFloat64SliceErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckFloat64SliceErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckFloat64SliceErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -909,7 +909,7 @@ func Test_CheckComplex64Err(t *testing.T) {
 		actual, checkErr := Std.CheckComplex64Err(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckComplex64Err(value, fmt.Errorf("error"))
+		_, _ = Std.CheckComplex64Err(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -924,7 +924,7 @@ func Test_CheckComplex64SliceErr(t *testing.T) {
 		actual, checkErr := Std.CheckComplex64SliceErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckComplex64SliceErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckComplex64SliceErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -939,7 +939,7 @@ func Test_CheckComplex128Err(t *testing.T) {
 		actual, checkErr := Std.CheckComplex128Err(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckComplex128Err(value, fmt.Errorf("error"))
+		_, _ = Std.CheckComplex128Err(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -954,7 +954,7 @@ func Test_CheckComplex128SliceErr(t *testing.T) {
 		actual, checkErr := Std.CheckComplex128SliceErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckComplex128SliceErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckComplex128SliceErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -969,7 +969,7 @@ func Test_CheckBoolErr(t *testing.T) {
 		actual, checkErr := Std.CheckBoolErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckBoolErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckBoolErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -984,7 +984,7 @@ func Test_CheckBoolSliceErr(t *testing.T) {
 		actual, checkErr := Std.CheckBoolSliceErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckBoolSliceErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckBoolSliceErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -999,7 +999,7 @@ func Test_CheckStringErr(t *testing.T) {
 		actual, checkErr := Std.CheckStringErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckStringErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckStringErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -1014,7 +1014,7 @@ func Test_CheckStringSliceErr(t *testing.T) {
 		actual, checkErr := Std.CheckStringSliceErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckStringSliceErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckStringSliceErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -1029,7 +1029,7 @@ func Test_CheckByteErr(t *testing.T) {
 		actual, checkErr := Std.CheckByteErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckByteErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckByteErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -1044,7 +1044,7 @@ func Test_CheckByteSliceErr(t *testing.T) {
 		actual, checkErr := Std.CheckByteSliceErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckByteSliceErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckByteSliceErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -1059,7 +1059,7 @@ func Test_CheckRuneErr(t *testing.T) {
 		actual, checkErr := Std.CheckRuneErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckRuneErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckRuneErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -1074,7 +1074,7 @@ func Test_CheckRuneSliceErr(t *testing.T) {
 		actual, checkErr := Std.CheckRuneSliceErr(value, nil)
 		assert.Equal(t, value, actual)
 		assert.Nil(t, checkErr)
-		Std.CheckRuneSliceErr(value, fmt.Errorf("error"))
+		_, _ = Std.CheckRuneSliceErr(value, fmt.Errorf("error"))
 		return nil
 	}
 

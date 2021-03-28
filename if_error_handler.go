@@ -36,7 +36,7 @@ type IfErrorHandler struct {
 // To avoid mixing, always instead of:
 //   return err
 // write
-//   return errf.CheckErr(err)
+//   return errf.CheckErr(err).IfOkReturnNil
 func (c *IfErrorHandler) ThenAssignTo(outErr *error) {
 	c.catch(recover(), func(err error) {
 		if *outErr != nil {
@@ -72,22 +72,22 @@ func (c *IfErrorHandler) ThenIgnore() {
 	c.catch(recover(), func(err error) {})
 }
 
-// ReturnFirst is an alias for Apply(ReturnStragetyFirst).
+// ReturnFirst is an alias for Apply(ReturnStrategyFirst).
 func (c *IfErrorHandler) ReturnFirst() *IfErrorHandler {
 	return c.Apply(ReturnStrategyFirst)
 }
 
-// ReturnLast is an alias for Apply(ReturnStragetyLast).
+// ReturnLast is an alias for Apply(ReturnStrategyLast).
 func (c *IfErrorHandler) ReturnLast() *IfErrorHandler {
 	return c.Apply(ReturnStrategyLast)
 }
 
-// ReturnWrapped is an alias for Apply(ReturnStragetyWrapped).
+// ReturnWrapped is an alias for Apply(ReturnStrategyWrapped).
 func (c *IfErrorHandler) ReturnWrapped() *IfErrorHandler {
 	return c.Apply(ReturnStrategyWrapped)
 }
 
-// ReturnCombined is an alias for Apply(ReturnStragetyCombined).
+// ReturnCombined is an alias for Apply(ReturnStrategyCombined).
 func (c *IfErrorHandler) ReturnCombined() *IfErrorHandler {
 	return c.Apply(ReturnStrategyCombined)
 }

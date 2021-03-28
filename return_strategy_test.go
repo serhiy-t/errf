@@ -36,10 +36,10 @@ func Test_returnStrategyCombinedImpl_multiple_errors(t *testing.T) {
 }
 
 func Test_GetCombinedErrors(t *testing.T) {
-	cerr := CombinedError{errs: []error{fmt.Errorf("err1"), fmt.Errorf("err2")}}
-	werr := fmt.Errorf("wrapped: %w", cerr)
-	assert.EqualError(t, werr, "wrapped: combined error {err1; err2}")
+	cErr := CombinedError{errs: []error{fmt.Errorf("err1"), fmt.Errorf("err2")}}
+	wErr := fmt.Errorf("wrapped: %w", cErr)
+	assert.EqualError(t, wErr, "wrapped: combined error {err1; err2}")
 	assert.Equal(t,
 		[]error{fmt.Errorf("err1"), fmt.Errorf("err2")},
-		GetCombinedErrors(werr))
+		GetCombinedErrors(wErr))
 }

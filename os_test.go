@@ -41,7 +41,7 @@ func Test_Os_CheckFileErr(t *testing.T) {
 		actual, checkErr := Os.CheckFileErr(value, nil)
 		assert.Same(t, value, actual)
 		assert.Nil(t, checkErr)
-		Os.CheckFileErr(value, fmt.Errorf("error"))
+		_, _ = Os.CheckFileErr(value, fmt.Errorf("error"))
 		return nil
 	}
 

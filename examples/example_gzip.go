@@ -20,8 +20,8 @@ func GzipFileErrflow(dstFilename string, srcFilename string) (err error) {
 	errWrapper := errf.WrapperFmtErrorw("error compressing file")
 	defer errf.IfError().ReturnFirst().LogIfSuppressed().Apply(errWrapper).ThenAssignTo(&err)
 
-	errf.CheckCondition(len(dstFilename) == 0, "dst file should be specified")
-	errf.CheckCondition(len(srcFilename) == 0, "src file should be specified")
+	errf.CheckAssert(len(dstFilename) > 0, "dst file should be specified")
+	errf.CheckAssert(len(srcFilename) > 0, "src file should be specified")
 
 	reader := errf.Io.CheckReadCloser(os.Open(srcFilename))
 	defer errf.With(errWrapper).LogDefer(reader.Close)
@@ -33,7 +33,7 @@ func GzipFileErrflow(dstFilename string, srcFilename string) (err error) {
 	gzipWriter := gzip.NewWriter(writer)
 	defer errf.CheckDeferErr(gzipWriter.Close)
 
-	return errf.CheckDiscard(io.Copy(gzipWriter, reader))
+	return errf.CheckDiscard(io.Copy(gzipWriter, reader)).IfOkReturnNil
 }
 
 // GzipFilePlainGo compresses file srcFilename into dstFilename.

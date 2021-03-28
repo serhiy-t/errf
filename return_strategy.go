@@ -61,7 +61,7 @@ func ReturnStrategyLast(ef *Errflow) *Errflow {
 // ReturnStrategyWrapped configures Errflow instance to return all errors.
 // First error will be wrapped using fmt.Errorf with "%w" parameter.
 // For other error, their messages will be included in resulting errors,
-// but the instances will be discraded.
+// but the instances will be discarded.
 func ReturnStrategyWrapped(ef *Errflow) *Errflow {
 	return setReturnStrategy(ef, returnStrategyWrapped)
 }
@@ -74,11 +74,11 @@ func ReturnStrategyCombined(ef *Errflow) *Errflow {
 	return setReturnStrategy(ef, returnStrategyCombined)
 }
 
-func returnStrategyFirstImpl(err1, err2 error) (supp1, supp2 bool, result error) {
+func returnStrategyFirstImpl(err1, _ error) (supp1, supp2 bool, result error) {
 	return false, true, err1
 }
 
-func returnStrategyLastImpl(err1, err2 error) (supp1, supp2 bool, result error) {
+func returnStrategyLastImpl(_, err2 error) (supp1, supp2 bool, result error) {
 	return true, false, err2
 }
 
@@ -91,12 +91,12 @@ type CombinedError struct {
 	errs []error
 }
 
-func (cerr CombinedError) Error() string {
-	var errors []string
-	for _, err := range cerr.errs {
-		errors = append(errors, err.Error())
+func (cErr CombinedError) Error() string {
+	var errorList []string
+	for _, err := range cErr.errs {
+		errorList = append(errorList, err.Error())
 	}
-	return fmt.Sprintf("combined error {%s}", strings.Join(errors, "; "))
+	return fmt.Sprintf("combined error {%s}", strings.Join(errorList, "; "))
 }
 
 // GetCombinedErrors returns all error instances from CombinedError error,
@@ -109,9 +109,9 @@ func GetCombinedErrors(err error) []error {
 	if err == nil {
 		return nil
 	}
-	var cerr CombinedError
-	if errors.As(err, &cerr) {
-		return cerr.errs
+	var cErr CombinedError
+	if errors.As(err, &cErr) {
+		return cErr.errs
 	}
 	return []error{err}
 }

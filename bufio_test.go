@@ -67,7 +67,7 @@ func Test_Bufio_CheckBufioWriterErr(t *testing.T) {
 		actual, checkErr := Bufio.CheckWriterErr(value, nil)
 		assert.Same(t, value, actual)
 		assert.Nil(t, checkErr)
-		Bufio.CheckWriterErr(value, fmt.Errorf("error"))
+		_, _ = Bufio.CheckWriterErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -82,7 +82,7 @@ func Test_Bufio_CheckBufioReaderErr(t *testing.T) {
 		actual, checkErr := Bufio.CheckReaderErr(value, nil)
 		assert.Same(t, value, actual)
 		assert.Nil(t, checkErr)
-		Bufio.CheckReaderErr(value, fmt.Errorf("error"))
+		_, _ = Bufio.CheckReaderErr(value, fmt.Errorf("error"))
 		return nil
 	}
 
@@ -97,7 +97,7 @@ func Test_Bufio_CheckBufioReadWriterErr(t *testing.T) {
 		actual, checkErr := Bufio.CheckReadWriterErr(value, nil)
 		assert.Same(t, value, actual)
 		assert.Nil(t, checkErr)
-		Bufio.CheckReadWriterErr(value, fmt.Errorf("error"))
+		_, _ = Bufio.CheckReadWriterErr(value, fmt.Errorf("error"))
 		return nil
 	}
 

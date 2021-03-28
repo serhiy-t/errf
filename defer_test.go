@@ -28,7 +28,7 @@ func Test_IfErrorAssignTo_ReturnStrategyLast_panics(t *testing.T) {
 	}
 
 	assert.Panics(t, func() {
-		fn()
+		_ = fn()
 	})
 }
 

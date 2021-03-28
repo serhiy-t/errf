@@ -511,7 +511,7 @@ func Test_Handler_NestedCheck_Success_Panic(t *testing.T) {
 	}
 
 	assert.PanicsWithValue(t, "panic 1", func() {
-		fn()
+		_ = fn()
 	})
 }
 
@@ -523,7 +523,7 @@ func Test_Handler_NestedCheck_Error_Success(t *testing.T) {
 
 		})
 
-		return CheckErr(fmt.Errorf("error 1"))
+		return CheckErr(fmt.Errorf("error 1")).IfOkReturnNil
 	}
 
 	assert.EqualError(t, fn(), "error 1")
@@ -537,7 +537,7 @@ func Test_Handler_NestedCheck_Error_Error(t *testing.T) {
 			CheckErr(fmt.Errorf("error 2"))
 		})
 
-		return CheckErr(fmt.Errorf("error 1"))
+		return CheckErr(fmt.Errorf("error 1")).IfOkReturnNil
 	}
 
 	assert.EqualError(t, fn(), "error 1 (also: error 2)")
@@ -551,11 +551,11 @@ func Test_Handler_NestedCheck_Error_Panic(t *testing.T) {
 			panic("panic 1")
 		})
 
-		return CheckErr(fmt.Errorf("error 1"))
+		return CheckErr(fmt.Errorf("error 1")).IfOkReturnNil
 	}
 
 	assert.PanicsWithValue(t, "panic 1", func() {
-		fn()
+		_ = fn()
 	})
 }
 
@@ -571,7 +571,7 @@ func Test_Handler_NestedCheck_Panic_Success(t *testing.T) {
 	}
 
 	assert.PanicsWithValue(t, "panic 1", func() {
-		fn()
+		_ = fn()
 	})
 }
 
@@ -587,7 +587,7 @@ func Test_Handler_NestedCheck_Panic_Error(t *testing.T) {
 	}
 
 	assert.PanicsWithValue(t, "panic 1", func() {
-		fn()
+		_ = fn()
 	})
 }
 
@@ -603,7 +603,7 @@ func Test_Handler_NestedCheck_Panic_Panic(t *testing.T) {
 	}
 
 	assert.PanicsWithValue(t, "panic 2", func() {
-		fn()
+		_ = fn()
 	})
 }
 
@@ -621,6 +621,6 @@ func Test_Handler_DoubleNestedCheck(t *testing.T) {
 	}
 
 	assert.PanicsWithError(t, "errflow incorrect call sequence", func() {
-		fn()
+		_ = fn()
 	})
 }

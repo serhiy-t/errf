@@ -31,6 +31,9 @@ func (ef *Errflow) IfErrorAssignTo(outErr *error, closeFn func() error) {
 		if ef.wrapper != nil {
 			err = ef.wrapper(err)
 		}
+		if err == nil {
+			panic("error wrapper returned nil error")
+		}
 		if *outErr == nil {
 			*outErr = err
 			if ef.logStrategy == logStrategyAlways {

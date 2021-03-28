@@ -31,7 +31,7 @@ func Test_getErrorStackTrace_panicErrors(t *testing.T) {
 		return nil
 	}
 
-	fn()
+	_ = fn()
 
 	assert.Equal(t, 3, len(stacks))
 	assert.Contains(t, strings.Split(strings.TrimSpace(stacks[0]), "\n")[2], "errf/stack_test.go:30")

@@ -146,7 +146,7 @@ func (s *errflowStack) empty() bool {
 var goroutineErrflowStackMap = make(map[int]*errflowStack)
 
 func getGoroutineErrflowStack() *errflowStack {
-	goID := goid()
+	goID := goId()
 	_, ok := goroutineErrflowStackMap[goID]
 	if !ok {
 		goroutineErrflowStackMap[goID] = &errflowStack{}
@@ -155,7 +155,7 @@ func getGoroutineErrflowStack() *errflowStack {
 }
 
 func cleanupGoroutineErrflowStack() {
-	goID := goid()
+	goID := goId()
 	errflowStack, ok := goroutineErrflowStackMap[goID]
 	if ok {
 		if errflowStack.empty() {
@@ -164,7 +164,7 @@ func cleanupGoroutineErrflowStack() {
 	}
 }
 
-func goid() int {
+func goId() int {
 	var buf [64]byte
 	n := runtime.Stack(buf[:], false)
 	idField := strings.Fields(strings.TrimPrefix(string(buf[:n]), "goroutine "))[0]

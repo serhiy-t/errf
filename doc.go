@@ -62,7 +62,7 @@
 //  	// or assign errors (err = fmt.Errorf(...)) for functions with IfError() handler.
 //  	// In such cases, wrap error in errf.CheckErr(...) to make sure it is handled
 //  	// by IfError() handler.
-//  	return errf.CheckErr(someFunction5())
+//  	return errf.CheckErr(someFunction5()).IfOkReturnNil
 //  }
 //
 // When any of Check* functions encounters an error, it immediately sends a program flow control
